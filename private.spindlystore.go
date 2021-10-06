@@ -4,10 +4,12 @@ import (
 	"github.com/HasinduLanka/Spindly/Spindly"
 )
 
-var cdsdc Spindly.SpindlyVar = Spindly.SpindlyVar{
+const store_name = "private"
+
+var pvt1 Spindly.SpindlyVar = Spindly.SpindlyVar{
 	Value: "Hello World!",
 	Template: func() interface{} {
 		return string("dcdc")
 	},
-	Store: "public",
+	Store: store_name,
 }

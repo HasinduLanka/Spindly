@@ -4,18 +4,20 @@ import (
 	"github.com/HasinduLanka/Spindly/Spindly"
 )
 
+const store_name = "public"
+
 var Message Spindly.SpindlyVar = Spindly.SpindlyVar{
 	Value: "Hello World!",
 	Template: func() interface{} {
 		return string("")
 	},
-	Store: "public",
+	Store: store_name,
 }
 
-var Text1 Spindly.SpindlyVar = Spindly.SpindlyVar{
+var TextBox1 Spindly.SpindlyVar = Spindly.SpindlyVar{
 	Value: "Test Text 1",
 	Template: func() interface{} {
 		return string("")
 	},
-	Store: "public",
+	Store: store_name,
 }

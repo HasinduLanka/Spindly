@@ -1,41 +1,43 @@
+import fg from "fast-glob";
+import SpindlyMake from "./SpindlyMake.js";
 
-import fg from 'fast-glob';
-import SpindlyMake from './SpindlyMake.js';
+let Verbose = false;
 
 export default function SpindlyDev() {
-    return {
-        name: 'SpindlyDev', // this name will show up in warnings and errors
-        async buildStart() {
+  return {
+    name: "SpindlyDev", // this name will show up in warnings and errors
+    async buildStart() {
+      try {
+        await SpindlyMake(Verbose);
+      } catch (error) {
+        console.error(error);
+      }
 
-            console.log('Spindly Build Started');
+      // var exec = require('child_process').exec;
+      // exec('ls', function callback(error, stdout, stderr) {
+      //     console.log('stdout: ' + stdout);
+      // });
 
-            try {
-                await SpindlyMake();
-            } catch (error) {
-                console.error(error);
-            }
+      // Re-initialize the watch files
+      if (Verbose) console.log("Watching Go Files...");
 
-            // var exec = require('child_process').exec;
-            // exec('ls', function callback(error, stdout, stderr) {
-            //     console.log('stdout: ' + stdout);
-            // });
+      await WatchFiles("**/**/*.go", this);
 
+      console.log("Spindly Build Finished");
 
-            // Re-initialize the watch files
-            console.log('Watching Go Files...');
+      return null;
+    },
 
-            await WatchFiles('**/**/*.go', this);
-            return null;
-        },
-
-
-    };
+    async buildEnd() {
+      if (Verbose) console.log("Spindly Build Finished");
+    },
+  };
 }
 
 async function WatchFiles(path, that) {
-    const files = await fg(path);
-    for (let file of files) {
-        console.log('Watching File: ' + file);
-        that.addWatchFile(file);
-    }
+  const files = await fg(path);
+  for (let file of files) {
+    if (Verbose) console.log("Watching File: " + file);
+    that.addWatchFile(file);
+  }
 }
