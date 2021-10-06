@@ -1,6 +1,6 @@
 
 
-function RegisterComponents(Components) {
+export default function RegisterComponents(Components) {
 
     let htags = document.querySelectorAll('span[svelte]');
 
@@ -37,5 +37,3 @@ function RegisterComponents(Components) {
 
     }
 }
-
-export default RegisterComponents;

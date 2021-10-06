@@ -110,7 +110,7 @@ export const store_name = '${storename}';
 
     for (const match of matches) {
         if (Verbose) console.log("\t\tSpindlyVar : ", match);
-        js += `export const ${match} = SpindlyVar();\n`;
+        js += `export const ${match} = SpindlyVar(store_name);\n`;
     }
 
     fs.writeFileSync(jsstore, js);
