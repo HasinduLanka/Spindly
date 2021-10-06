@@ -4,7 +4,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
-import spindlybuild from './spindlybuild';
+import SpindlyDev from './SpindlyDev';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -29,6 +29,7 @@ function serve() {
 	};
 }
 
+
 export default {
 	input: 'src/main.js',
 	output: {
@@ -38,8 +39,9 @@ export default {
 		file: 'public/build/bundle.js'
 	},
 	plugins: [
-		spindlybuild(),
 		svelte({
+			// Tell the svelte plugin where our svelte files are located
+			include: 'src/**/*.svelte',
 			compilerOptions: {
 				// enable run-time checks when not in production
 				dev: !production
@@ -70,7 +72,10 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser(),
+
+		!production && SpindlyDev(),
+
 	],
 	watch: {
 		clearScreen: false

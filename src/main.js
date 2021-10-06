@@ -1,4 +1,4 @@
-import RegisterComponents from './SpanComponents.js';
+import RegisterComponents from './SvelteComponents.js';
 
 import App from './App.svelte';
 import Counter from './Counter.svelte';
@@ -12,6 +12,10 @@ let Components = {
 };
 
 RegisterComponents(Components);
+
+
+
+
 
 
 // export default app;
