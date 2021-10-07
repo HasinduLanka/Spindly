@@ -1,7 +1,7 @@
 import fg from "fast-glob";
 import SpindlyMake from "./SpindlyMake.js";
 
-let Verbose = false;
+let Verbose = true;
 
 export default function SpindlyDev() {
   return {
@@ -13,15 +13,17 @@ export default function SpindlyDev() {
         console.error(error);
       }
 
-      // var exec = require('child_process').exec;
-      // exec('ls', function callback(error, stdout, stderr) {
-      //     console.log('stdout: ' + stdout);
-      // });
+
 
       // Re-initialize the watch files
       if (Verbose) console.log("Watching Go Files...");
 
-      await WatchFiles("**/**/*.go", this);
+      const files = fg.sync(["**/**/*.go", "SpindlyStores.js", "!**/*.spindlystore.go"]);
+      for (let file of files) {
+        if (Verbose) console.log("Watching File: " + file);
+        this.addWatchFile(file);
+      }
+
 
       console.log("Spindly Build Finished");
 
@@ -34,10 +36,4 @@ export default function SpindlyDev() {
   };
 }
 
-async function WatchFiles(path, that) {
-  const files = await fg(path);
-  for (let file of files) {
-    if (Verbose) console.log("Watching File: " + file);
-    that.addWatchFile(file);
-  }
-}
+

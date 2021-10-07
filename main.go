@@ -2,8 +2,7 @@ package main
 
 import (
 	"github.com/HasinduLanka/Spindly/Spindly"
-	"github.com/HasinduLanka/Spindly/publicstore"
-	"github.com/HasinduLanka/Spindly/publicstore/substore1"
+	"github.com/HasinduLanka/Spindly/SpindlyStores"
 )
 
 func main() {
@@ -13,9 +12,8 @@ func main() {
 	}
 
 	var SV Spindly.SpindlyVar
-	SV.Value = 123
+	_ = SV
 
-	publicstore.Message.Value = ""
-	substore1.A.Value = ""
+	println(SpindlyStores.Global1.InstanceName)
 
 }

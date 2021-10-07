@@ -1,31 +1,163 @@
 
 import fg from 'fast-glob';
 import fs from 'fs';
+import { SpindlyStores, GoStorePackageName } from './SpindlyStores.js';
 
 let Verbose = false;
+let GoStoreFileName;
 
 export default async function SpindlyMake(verbose = false) {
     Verbose = verbose;
 
     if (Verbose) console.log('Spindly Make Started');
 
-    await DeleteAllSpindlyStoreJs();
+    GoStoreFileName = GoStorePackageName + "/" + GoStorePackageName + ".spindlystore.go";
 
-    // Get all *.spindlystore.go files in upto 2 levels of subdirectories
-    const files = await fg("**/**/*.spindlystore.go");
+    await CleanSpindlyStores();
 
-    let MakePromises = new Array(files.length);;
-    for (let file of files) {
+    let MakePromises = [];
+
+    // Make the Go store file
+    let go = `package ${GoStorePackageName}
+
+import "github.com/HasinduLanka/Spindly/Spindly"
+`
+
+
+    for (const [storename, store] of Object.entries(SpindlyStores)) {
+
+
+        async function MakeSvelteStore() {
+            // Get the name of the store
+
+            let jsstore = `src/${store.filepath}.spindlystore.js`;
+
+            if (Verbose) console.log("\tJS Store : ", jsstore);
+
+            CreateDir(jsstore);
+
+
+            // Count how many nested directories are in the file path
+            // and make rootDirPath for js module imports
+            let rootDirPath = '';
+            for (let i = 0; i < store.filepath.length; i++) {
+                if (store.filepath[i] == '/') {
+                    rootDirPath += "../";
+                }
+            }
+
+            if (rootDirPath.length == 0) {
+                rootDirPath = './';
+            }
+
+
+            // Make the svelte store file
+            let js = `import SpindlyVar from '${rootDirPath}SpindlyVar.js'
+
+const store_name = '${storename}';
+
+
+`;
+            go += `
+type ${storename} struct {
+    InstanceName string
+    StoreName string
+`
+
+
+            for (const [name, V] of Object.entries(store.store)) {
+                if (Verbose) console.log("\t\tSpindlyVar : ", name);
+
+                js += `export const ${name} = SpindlyVar(store_name);\n`;
+                go += `\t${name} Spindly.SpindlyVar\n`;
+
+            }
+
+
+            go += `}
+
+`
+
+            if (store["instances"] != undefined && store["instances"].length > 0) {
+                for (const instname of store.instances) {
+                    go += `var ${instname} = ${storename}{InstanceName: "${instname}"}\n`
+                }
+
+
+            }
+
+            go += `
+func (store *${storename}) Connect(connector Spindly.StoreConnector) {
+	store.StoreName = "${storename}"
+`;
+
+            for (const [name, V] of Object.entries(store.store)) {
+                go += `
+    store.${name} = Spindly.SpindlyVar{
+        Template: func() interface{} {
+            return ${V.template}
+        },
+    }
+    connector.Register(store.${name})
+`;
+
+            }
+
+            go += `}\n`;
+
+            for (const [name, V] of Object.entries(store.store)) {
+                go += `
+func (store *${storename}) Get${name}() ${V.type} {
+    return store.${name}.Get().(${V.type})
+}`;
+            }
+            //instances
+            go += `\n`;
+
+
+            fs.writeFileSync(jsstore, js);
+
+        }
+
         if (Verbose) {
-            await MakeSvelteStore(file);
+            await MakeSvelteStore(storename, store);
         } else {
             // Concurency
-            MakePromises.push(MakeSvelteStore(file));
+            MakePromises.push(MakeSvelteStore(storename, store));
         }
 
     }
 
+    // Make the Go store file
+    fs.writeFileSync(GoStoreFileName, go);
+
     await Promise.all(MakePromises);
+
+    Exec(`go fmt ${GoStoreFileName} `);
+
+}
+
+function Exec(file) {
+    var exec = require('child_process').exec;
+    exec(file, function callback(error, stdout, stderr) {
+        if (stdout) console.log(file + ': ' + stdout);
+        if (stderr) console.log(file + ': Erro : ' + stderr);
+        if (error) console.error(error);
+    });
+}
+
+
+
+function CreateDir(filename) {
+    // Get directory of the filename
+    let dir = filename.substring(0, filename.lastIndexOf('/'));
+    if (dir.length != 0) {
+        // Make directory if it doesn't exist
+        if (!fs.existsSync(dir)) {
+            if (Verbose) console.log('\tCreating directory: ' + dir);
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    }
 }
 
 
@@ -40,80 +172,28 @@ function getRegexGroupMatches(string, regex, index) {
 }
 
 
-async function DeleteAllSpindlyStoreJs() {
-    const files = await fg("src/**/**/*.spindlystore.js");
-    for (let file of files) {
-        fs.rmSync(file, { force: true });
+async function CleanSpindlyStores() {
+
+    // Optimized for concurency
+
+    let rmGoFile = RemoveFile(GoStoreFileName);
+
+    const jsfiles = await fg("src/**/**/*.spindlystore.js");
+    let filesdels = new Array(jsfiles.length + 1);
+    filesdels.push(rmGoFile);
+
+    for (let file of jsfiles) {
+        filesdels.push(RemoveFile(file));
     }
+
+    CreateDir(GoStoreFileName);
+
+    await Promise.all(filesdels);
 }
 
-
-async function MakeSvelteStore(file) {
-    // Get the name of the file path without '.spindlystore.go' suffix
-    let filename = file.substring(0, file.length - '.spindlystore.go'.length);
-
-
-    // Clean up previous *.spindlystore.js files
-    let jsstore = `src/${filename}.spindlystore.js`;
-    fs.rmSync(jsstore, { force: true });
-
-    if (Verbose) console.log("\tStore : ", jsstore);
-
-
-    // Get directory of the file
-    let dir = "src/" + file.substring(0, file.lastIndexOf('/'));
-    if (dir.length != 0) {
-        dir += '/';
-        // Make directory if it doesn't exist
-        if (!fs.existsSync(dir)) {
-            if (Verbose) console.log('\tCreating directory: ' + dir);
-            fs.mkdirSync(dir, { recursive: true });
-        }
-    }
-
-    // Count how many nested directories are in the file path
-    // and make rootDirPath for js module imports
-    let rootDirPath = '';
-    for (let i = 0; i < filename.length; i++) {
-        if (filename[i] == '/') {
-            rootDirPath += "../";
-        }
-    }
-
-    if (rootDirPath.length == 0) {
-        rootDirPath = './';
-    }
-
-
-    // Get the go file contents
-    const data = fs.readFileSync(file, 'utf8');
-
-    // Get the store name
-    let storename = "default";
-    let storenames = getRegexGroupMatches(data, / *const +.*?store_name.*? *= *"([a-zA-Z1-9_]+)"/g, 1);
-
-    if (storenames.length > 0) {
-        storename = storenames[0];
-    }
-
-
-
-    // Find "var VARIABLE_NAME1 Spindly.SpindlyVar" patterns
-    let matches = getRegexGroupMatches(data, / *var +([a-zA-Z1-9_]+) +Spindly.SpindlyVar/g, 1);
-
-    // Make the svelte store file
-    let js = `import SpindlyVar from '${rootDirPath}SpindlyVar.js'
-
-export const store_name = '${storename}';
-
-`;
-
-    for (const match of matches) {
-        if (Verbose) console.log("\t\tSpindlyVar : ", match);
-        js += `export const ${match} = SpindlyVar(store_name);\n`;
-    }
-
-    fs.writeFileSync(jsstore, js);
+async function RemoveFile(file) {
+    fs.rmSync(file, { force: true });
+    return null;
 }
 
 
