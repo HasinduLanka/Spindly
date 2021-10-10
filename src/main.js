@@ -12,10 +12,3 @@ let Components = {
 };
 
 RegisterComponents(Components);
-
-
-
-
-
-
-// export default app;
