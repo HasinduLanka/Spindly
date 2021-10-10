@@ -1,7 +1,7 @@
 
 import fg from 'fast-glob';
 import fs from 'fs';
-import { SpindlyStores, GoStorePackageName } from './SpindlyStores.js';
+// import { SpindlyStores, GoStorePackageName } from './SpindlyStores.js';
 
 let Verbose = false;
 let GoStoreFileName;
@@ -11,9 +11,13 @@ export default async function SpindlyMake(verbose = false) {
 
     if (Verbose) console.log('Spindly Make Started');
 
-    GoStoreFileName = GoStorePackageName + "/" + GoStorePackageName + ".spindlystore.go";
+    let SpindlyStores = JSON.parse(fs.readFileSync('SpindlyStores.json', 'utf8'));
 
-    await CleanSpindlyStores();
+    let GoStorePackageName = "SpindlyStores";
+
+    GoStoreFileName = GoStorePackageName + "/" + GoStorePackageName + ".spindlyhubs.go";
+
+    await CleanSpindlyHubs();
 
     let MakePromises = [];
 
@@ -24,24 +28,24 @@ import "github.com/HasinduLanka/Spindly/Spindly"
 `
 
 
-    for (const [storename, store] of Object.entries(SpindlyStores)) {
+    for (const [hubname, hub] of Object.entries(SpindlyStores)) {
 
 
-        async function MakeSvelteStore() {
+        async function MakeSvelteHub() {
             // Get the name of the store
 
-            let jsstore = `src/${store.filepath}.spindlystore.js`;
+            let jshub = `src/${hub.filepath}.spindlyhubs.js`;
 
-            if (Verbose) console.log("\tJS Store : ", jsstore);
+            if (Verbose) console.log("\tJS Hub : ", jshub);
 
-            CreateDir(jsstore);
+            CreateDir(jshub);
 
 
             // Count how many nested directories are in the file path
             // and make rootDirPath for js module imports
             let rootDirPath = '';
-            for (let i = 0; i < store.filepath.length; i++) {
-                if (store.filepath[i] == '/') {
+            for (let i = 0; i < hub.filepath.length; i++) {
+                if (hub.filepath[i] == '/') {
                     rootDirPath += "../";
                 }
             }
@@ -51,79 +55,102 @@ import "github.com/HasinduLanka/Spindly/Spindly"
             }
 
 
-            // Make the svelte store file
-            let js = `import SpindlyVar from '${rootDirPath}SpindlyVar.js'
+            // Make the svelte Hub file
+            let js = `import ConnectHub from '${rootDirPath}SpindlyHubs.js'
 
-const store_name = '${storename}';
+const hub_name = '${hubname}';
 
-
+export function ${hubname}(hub_instance_id) {
+    let SpindlyStore = ConnectHub(hub_name, hub_instance_id);
+    return {
 `;
             go += `
-type ${storename} struct {
-    InstanceName string
-    StoreName string
+type ${hubname} struct {
+    Instance *Spindly.HubInstance
 `
 
 
-            for (const [name, V] of Object.entries(store.store)) {
-                if (Verbose) console.log("\t\tSpindlyVar : ", name);
+            for (const [name, V] of Object.entries(hub.stores)) {
+                if (Verbose) console.log("\t\SpindlyStore : ", name);
 
-                js += `export const ${name} = SpindlyVar(store_name);\n`;
-                go += `\t${name} Spindly.SpindlyVar\n`;
+                js += `        ${name}: SpindlyStore("${name}"),\n`;
+                go += `\t${name} Spindly.SpindlyStore\n`;
 
             }
 
 
+            js += `    }
+}
+
+`;
             go += `}
 
 `
 
-            if (store["instances"] != undefined && store["instances"].length > 0) {
-                for (const instname of store.instances) {
-                    go += `var ${instname} = ${storename}{InstanceName: "${instname}"}\n`
+            if ((hub.hasOwnProperty("instances")) && (hub.instances.length > 0)) {
+                for (const instname of hub.instances) {
+                    js += `export let ${instname} = ${hubname}("${instname}");\n`;
+                    go += `var ${instname} = ${hubname}{}.Instanciate("${instname}")\n`
                 }
-
-
             }
 
             go += `
-func (store *${storename}) Connect(connector Spindly.StoreConnector) {
-	store.StoreName = "${storename}"
+func (hub ${hubname}) Instanciate(InstanceID string) *${hubname} {
+	hub.Instance = &Spindly.HubInstance{
+		HubName:    "${hubname}",
+		InstanceID: InstanceID,
+	}
+
+	return &hub
+}
+
+func (hub *${hubname}) Connect(connector *Spindly.HubConnector) {
 `;
 
-            for (const [name, V] of Object.entries(store.store)) {
+            for (const [name, V] of Object.entries(hub.stores)) {
                 go += `
-    store.${name} = Spindly.SpindlyVar{
-        Template: func() interface{} {
-            return ${V.template}
-        },
-    }
-    connector.Register(store.${name})
+    hub.${name} = Spindly.NewSpindlyStore(
+		"${name}",
+		func() interface{} {
+			return ${V.template}
+		},`;
+
+                if ((V.hasOwnProperty("default")) && (V.default)) {
+                    go += `
+		${V.default},`;
+                } else {
+                    go += `
+        nil,`;
+                }
+
+                go += `
+	)
+    connector.Register(&hub.${name})
 `;
 
             }
 
             go += `}\n`;
 
-            for (const [name, V] of Object.entries(store.store)) {
+            for (const [name, V] of Object.entries(hub.stores)) {
                 go += `
-func (store *${storename}) Get${name}() ${V.type} {
-    return store.${name}.Get().(${V.type})
+func (hub *${hubname}) Get${name}() ${V.type} {
+    return hub.${name}.Get().(${V.type})
 }`;
             }
             //instances
             go += `\n`;
 
 
-            fs.writeFileSync(jsstore, js);
+            fs.writeFileSync(jshub, js);
 
         }
 
         if (Verbose) {
-            await MakeSvelteStore(storename, store);
+            await MakeSvelteHub(hubname, hub);
         } else {
             // Concurency
-            MakePromises.push(MakeSvelteStore(storename, store));
+            MakePromises.push(MakeSvelteHub(hubname, hub));
         }
 
     }
@@ -172,13 +199,13 @@ function getRegexGroupMatches(string, regex, index) {
 }
 
 
-async function CleanSpindlyStores() {
+async function CleanSpindlyHubs() {
 
     // Optimized for concurency
 
     let rmGoFile = RemoveFile(GoStoreFileName);
 
-    const jsfiles = await fg("src/**/**/*.spindlystore.js");
+    const jsfiles = await fg("src/**/**/*.spindlyhubs.js");
     let filesdels = new Array(jsfiles.length + 1);
     filesdels.push(rmGoFile);
 

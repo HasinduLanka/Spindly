@@ -105,3 +105,38 @@ Then, from within your project folder:
 npm run build
 surge public my-project.surge.sh
 ```
+
+
+```
+{
+    "GlobalHub": {
+        // File path prefix for js files.
+        // For example "storesfolder/file1" becomes "src/storesfolder/file1.spindlystore.js"
+        "filepath": "stores/global",
+        // Variables that are stored.
+        "stores": {
+            // Variable name. First letter must be capital, if not it won't be available outside the 'GoStorePackage'
+            "AppName": {
+                // Variable type : used to determine the type of variable in go code. No effect on javascript code.
+                // Can be "string", "int", "bool", "float" or any type/struct name that is defined in go code, that can be serialized to json.
+                "type": "string",
+                // Go expression that will be evaluated each time the variable is deserialized from json.
+                // For example : use "``" for strings, "0" for ints, "MyStruct{}" for structs.
+                "template": "``",
+                // Go expression that will be evaluated to get the initial value of the variable stored in Go code.
+                "default": "`Spindly Sample App`"
+            },
+            "Version": {
+                "type": "string",
+                "template": "``"
+            }
+        },
+        // Hub instances that are preconfigured to use this hub template. 
+        // These instance names are used to subscribe to the hub from both go and javascript code.
+        // First letter must be capital, if not it won't be available outside the 'GoStorePackage'
+        // Must be unique from other hub instances and hub names.
+        "instances": [
+            "Global",
+            "Global2"
+        ],
+```

@@ -1,0 +1,45 @@
+{
+    "GlobalHub": {
+        "filepath": "stores/global",
+        "stores": {
+            "AppName": {
+                "type": "string",
+                "template": "``",
+                "default": "`Spindly Sample App`"
+            },
+            "Version": {
+                "type": "string",
+                "template": "``"
+            }
+        },
+        "instances": [
+            "Global",
+            "Global2"
+        ]
+    },
+    "ClockHub": {
+        "filepath": "stores/clock",
+        "stores": {
+            "Clock134": {
+                "type": "string",
+                "template": "``",
+                "default": ""
+            }
+        }
+    },
+    "ExampleHub": {
+        "filepath": "stores/example",
+        "stores": {
+            "Message": {
+                "type": "string",
+                "template": "``",
+                "default": ""
+            },
+            "TextBox1": {
+                "type": "string",
+                "template": "``",
+                "default": ""
+            }
+        }
+    }
+}

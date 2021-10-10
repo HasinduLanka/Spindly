@@ -1,12 +1,25 @@
-<script lang="ts">
-	import { PrivateStore } from "./publicstore/private.store";
+<script>
+	import { Global, Global2 } from "./stores/global.spindlyhubs.js";
+	import { ExampleHub } from "./stores/example.spindlyhubs.js";
 	export let name = "world";
 
-	let { Message, TextBox1 } = PrivateStore();
-	let { Message: Message2, TextBox2 } = PrivateStore();
+	let { Message, TextBox1 } = ExampleHub();
+	let { Message: Message2, TextBox1: TextBox2 } = ExampleHub();
+
+	let { AppName, Version } = Global;
 </script>
 
 <h1>Hello {name}!</h1>
+
+
+<p>Global</p>
+<input type="text" bind:value={$AppName} />
+<br />
+<pre>AppName : {$AppName}</pre>
+<br />
+<pre>Version : {$Version}</pre>
+
+<br />
 
 <p>Private store 1 :</p>
 <input type="text" bind:value={$Message} />
@@ -14,6 +27,7 @@
 <pre>{$Message}</pre>
 <br />
 <br />
+
 <p>Private store 2 :</p>
 <input type="text" bind:value={$Message2} />
 <br />

@@ -13,21 +13,34 @@ func init() {
 
 }
 
-type SpindlyVar struct {
+type SpindlyStore struct {
 	Name      string
 	value     interface{}
 	Template  func() interface{}
-	Store     *StoreConnector
+	Store     *HubConnector
 	listeners map[int]chan interface{}
 }
 
+func NewSpindlyStore(name string, template func() interface{}, initialValue interface{}) SpindlyStore {
+	if initialValue == nil {
+		initialValue = template()
+	}
+
+	return SpindlyStore{
+		Name:      name,
+		Template:  template,
+		value:     initialValue,
+		listeners: make(map[int]chan interface{}),
+	}
+}
+
 // Returns the value of the variable
-func (v *SpindlyVar) Get() interface{} {
+func (v *SpindlyStore) Get() interface{} {
 	return v.value
 }
 
 // Set the value of the variable, notify all listeners and send it to the store
-func (v *SpindlyVar) Set(value interface{}) {
+func (v *SpindlyStore) Set(value interface{}) {
 	v.received(value)
 
 	if v.Store != nil {
@@ -36,7 +49,7 @@ func (v *SpindlyVar) Set(value interface{}) {
 }
 
 // Returns a channel that will receive the next values of the variable and a function to unlisten
-func (v *SpindlyVar) Listen() (chan interface{}, func()) {
+func (v *SpindlyStore) Listen() (chan interface{}, func()) {
 	listener := make(chan interface{})
 
 	id := <-listnerNextID
@@ -51,7 +64,7 @@ func (v *SpindlyVar) Listen() (chan interface{}, func()) {
 }
 
 // (Private) Recieved from the store connection or changed by Go
-func (v *SpindlyVar) received(value interface{}) {
+func (v *SpindlyStore) received(value interface{}) {
 	v.value = value
 	for _, listener := range v.listeners {
 		listener <- value
@@ -59,7 +72,7 @@ func (v *SpindlyVar) received(value interface{}) {
 }
 
 // Run a function each time the variable changes
-func (v *SpindlyVar) OnChange(f func(interface{})) func() {
+func (v *SpindlyStore) OnChange(f func(interface{})) func() {
 	var listner, unlisten = v.Listen()
 
 	var cancel = make(chan bool)
@@ -82,7 +95,7 @@ func (v *SpindlyVar) OnChange(f func(interface{})) func() {
 
 // Waits for the next variable to change and return the value.
 // This is a blocking call.
-func (v *SpindlyVar) Next() interface{} {
+func (v *SpindlyStore) Next() interface{} {
 	var listner, unlisten = v.Listen()
 	value := <-listner
 

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/HasinduLanka/Spindly/Spindly"
 	"github.com/HasinduLanka/Spindly/SpindlyStores"
 )
+
+//dcdc
 
 func main() {
 	var a int = 1
@@ -11,9 +12,6 @@ func main() {
 		println("a is 1")
 	}
 
-	var SV Spindly.SpindlyVar
-	_ = SV
-
-	println(SpindlyStores.Global1.InstanceName)
+	println(SpindlyStores.Global.AppName)
 
 }
