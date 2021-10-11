@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/HasinduLanka/Spindly/SpindlyStores"
+	"github.com/HasinduLanka/Spindly/Spindly"
+	"github.com/HasinduLanka/Spindly/spindlyapp"
 )
 
 //dcdc
@@ -12,6 +13,9 @@ func main() {
 		println("a is 1")
 	}
 
-	println(SpindlyStores.Global.AppName)
+	hub := Spindly.HubConnector{}
+	spindlyapp.Global.Connect(&hub)
+
+	println(spindlyapp.Global.GetAppName())
 
 }

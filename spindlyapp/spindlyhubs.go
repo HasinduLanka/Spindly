@@ -1,4 +1,4 @@
-package SpindlyStores
+package spindlyapp
 
 import "github.com/HasinduLanka/Spindly/Spindly"
 

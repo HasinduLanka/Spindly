@@ -1,5 +1,5 @@
 import fg from "fast-glob";
-import SpindlyMake from "./SpindlyMake.js";
+import SpindlyMake from "./spindlymake.js";
 
 let Verbose = true;
 
@@ -31,7 +31,7 @@ export default function SpindlyDev() {
     },
 
     async buildEnd() {
-      if (Verbose) console.log("Spindly Build Finished");
+      if (Verbose) console.log("Spindly Build End");
     },
   };
 }

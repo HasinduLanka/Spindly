@@ -1,7 +1,6 @@
 
 import fg from 'fast-glob';
 import fs from 'fs';
-// import { SpindlyStores, GoStorePackageName } from './SpindlyStores.js';
 
 let Verbose = false;
 let GoStoreFileName;
@@ -13,9 +12,9 @@ export default async function SpindlyMake(verbose = false) {
 
     let SpindlyStores = JSON.parse(fs.readFileSync('SpindlyStores.json', 'utf8'));
 
-    let GoStorePackageName = "SpindlyStores";
+    const GoStorePackageName = "spindlyapp";
 
-    GoStoreFileName = GoStorePackageName + "/" + GoStorePackageName + ".spindlyhubs.go";
+    GoStoreFileName = GoStorePackageName + "/spindlyhubs.go";
 
     await CleanSpindlyHubs();
 
