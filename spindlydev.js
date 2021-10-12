@@ -18,7 +18,7 @@ export default function SpindlyDev() {
       // Re-initialize the watch files
       if (Verbose) console.log("Watching Go Files...");
 
-      const files = fg.sync(["**/**/*.go", "SpindlyStores.json", "!**/*.spindlyhubs.go"]);
+      const files = fg.sync(["**/**/*.go", "SpindlyStores.json", "!**/spindlyhubs.go"]);
       for (let file of files) {
         if (Verbose) console.log("Watching File: " + file);
         this.addWatchFile(file);

@@ -2,20 +2,27 @@ package main
 
 import (
 	"github.com/HasinduLanka/Spindly/Spindly"
+	"github.com/HasinduLanka/Spindly/SpindlyServer"
 	"github.com/HasinduLanka/Spindly/spindlyapp"
 )
 
 //dcdc
 
 func main() {
-	var a int = 1
-	if a == 1 {
-		println("a is 1")
-	}
+
+	println(" --- Spindly Server --- ")
+
+	router := SpindlyServer.NewRouter()
+	SpindlyServer.HandleWS(router)
+	SpindlyServer.HandleStatic(router, "public", "index.html")
 
 	hub := Spindly.HubConnector{}
-	spindlyapp.Global.Connect(&hub)
+
+	var global Spindly.HubType = spindlyapp.Global
+	global.Connect(&hub)
 
 	println(spindlyapp.Global.GetAppName())
+
+	SpindlyServer.Serve(router, "32510")
 
 }

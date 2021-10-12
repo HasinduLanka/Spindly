@@ -3,14 +3,13 @@
 	import { ExampleHub } from "./stores/example.spindlyhubs.js";
 	export let name = "world";
 
-	let { Message, TextBox1 } = ExampleHub();
-	let { Message: Message2, TextBox1: TextBox2 } = ExampleHub();
+	let { Message, TextBox1 } = ExampleHub("example1");
+	let { Message: Message2, TextBox1: TextBox2 } = ExampleHub("example2");
 
 	let { AppName, Version } = Global;
 </script>
 
 <h1>Hello {name}!</h1>
-
 
 <p>Global</p>
 <input type="text" bind:value={$AppName} />
@@ -21,7 +20,7 @@
 
 <br />
 
-<p>Private store 1 :</p>
+<p>Private store instance 1 :</p>
 <input type="text" bind:value={$Message} />
 <br />
 <pre>{$Message}</pre>

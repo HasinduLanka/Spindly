@@ -15,12 +15,8 @@ func (hub GlobalHub) Instanciate(InstanceID string) *GlobalHub {
 	hub.Instance = &Spindly.HubInstance{
 		HubName:    "GlobalHub",
 		InstanceID: InstanceID,
+		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
-
-	return &hub
-}
-
-func (hub *GlobalHub) Connect(connector *Spindly.HubConnector) {
 
 	hub.AppName = Spindly.NewSpindlyStore(
 		"AppName",
@@ -29,7 +25,7 @@ func (hub *GlobalHub) Connect(connector *Spindly.HubConnector) {
 		},
 		`Spindly Sample App`,
 	)
-	connector.Register(&hub.AppName)
+	hub.Instance.Register(&hub.AppName)
 
 	hub.Version = Spindly.NewSpindlyStore(
 		"Version",
@@ -38,7 +34,12 @@ func (hub *GlobalHub) Connect(connector *Spindly.HubConnector) {
 		},
 		nil,
 	)
-	connector.Register(&hub.Version)
+	hub.Instance.Register(&hub.Version)
+
+	return &hub
+}
+
+func (hub *GlobalHub) Connect(connector *Spindly.HubConnector) {
 }
 
 func (hub *GlobalHub) GetAppName() string {
@@ -57,12 +58,8 @@ func (hub ClockHub) Instanciate(InstanceID string) *ClockHub {
 	hub.Instance = &Spindly.HubInstance{
 		HubName:    "ClockHub",
 		InstanceID: InstanceID,
+		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
-
-	return &hub
-}
-
-func (hub *ClockHub) Connect(connector *Spindly.HubConnector) {
 
 	hub.Clock134 = Spindly.NewSpindlyStore(
 		"Clock134",
@@ -71,7 +68,12 @@ func (hub *ClockHub) Connect(connector *Spindly.HubConnector) {
 		},
 		nil,
 	)
-	connector.Register(&hub.Clock134)
+	hub.Instance.Register(&hub.Clock134)
+
+	return &hub
+}
+
+func (hub *ClockHub) Connect(connector *Spindly.HubConnector) {
 }
 
 func (hub *ClockHub) GetClock134() string {
@@ -88,12 +90,8 @@ func (hub ExampleHub) Instanciate(InstanceID string) *ExampleHub {
 	hub.Instance = &Spindly.HubInstance{
 		HubName:    "ExampleHub",
 		InstanceID: InstanceID,
+		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
-
-	return &hub
-}
-
-func (hub *ExampleHub) Connect(connector *Spindly.HubConnector) {
 
 	hub.Message = Spindly.NewSpindlyStore(
 		"Message",
@@ -102,7 +100,7 @@ func (hub *ExampleHub) Connect(connector *Spindly.HubConnector) {
 		},
 		nil,
 	)
-	connector.Register(&hub.Message)
+	hub.Instance.Register(&hub.Message)
 
 	hub.TextBox1 = Spindly.NewSpindlyStore(
 		"TextBox1",
@@ -111,7 +109,12 @@ func (hub *ExampleHub) Connect(connector *Spindly.HubConnector) {
 		},
 		nil,
 	)
-	connector.Register(&hub.TextBox1)
+	hub.Instance.Register(&hub.TextBox1)
+
+	return &hub
+}
+
+func (hub *ExampleHub) Connect(connector *Spindly.HubConnector) {
 }
 
 func (hub *ExampleHub) GetMessage() string {

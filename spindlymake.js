@@ -98,13 +98,10 @@ func (hub ${hubname}) Instanciate(InstanceID string) *${hubname} {
 	hub.Instance = &Spindly.HubInstance{
 		HubName:    "${hubname}",
 		InstanceID: InstanceID,
+		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
+`
 
-	return &hub
-}
-
-func (hub *${hubname}) Connect(connector *Spindly.HubConnector) {
-`;
 
             for (const [name, V] of Object.entries(hub.stores)) {
                 go += `
@@ -124,10 +121,17 @@ func (hub *${hubname}) Connect(connector *Spindly.HubConnector) {
 
                 go += `
 	)
-    connector.Register(&hub.${name})
+    hub.Instance.Register(&hub.${name})
 `;
 
             }
+
+            go += `
+            return &hub
+        }
+        
+        func (hub *${hubname}) Connect(connector *Spindly.HubConnector) {
+        `;
 
             go += `}\n`;
 

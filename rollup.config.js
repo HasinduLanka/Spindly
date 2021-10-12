@@ -7,21 +7,32 @@ import css from 'rollup-plugin-css-only';
 import SpindlyDev from './spindlydev';
 
 const production = !process.env.ROLLUP_WATCH;
+const GORUN = (process.env.GORUN && process.env.GORUN === '1') || false;
 
 function serve() {
-	let server;
+	let gppid;
 
 	function toExit() {
-		if (server) server.kill(0);
+		if (gppid) {
+			var kill = require('tree-kill');
+			kill(gppid);
+		}
 	}
 
 	return {
 		writeBundle() {
-			if (server) return;
-			server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+			if (gppid) {
+				var kill = require('tree-kill');
+				kill(gppid);
+				console.log("Restarting Go");
+			}
+
+			let server = require('child_process').spawn('go', ["run", "."], {
 				stdio: ['ignore', 'inherit', 'inherit'],
-				shell: true
+				// shell: true,
 			});
+
+			gppid = server.pid;
 
 			process.on('SIGTERM', toExit);
 			process.on('exit', toExit);
@@ -61,9 +72,7 @@ export default {
 		}),
 		commonjs(),
 
-		// In dev mode, call `npm run start` once
-		// the bundle has been generated
-		!production && serve(),
+		GORUN && serve(),
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production

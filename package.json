@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "debug": "rollup -c -w",
+    "dev": "GORUN=1 rollup -c -w"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -19,6 +19,6 @@
   },
   "dependencies": {
     "fast-glob": "^3.2.7",
-    "sirv-cli": "^1.0.0"
+    "tree-kill": "^1.2.2"
   }
 }
