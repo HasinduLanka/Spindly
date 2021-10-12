@@ -8,12 +8,12 @@
             "windows": {
                 "command": "ping 127.0.0.1 -n 3 > nul"
             },
-            "group": "none",
             "presentation": {
                 "reveal": "never",
                 "panel": "shared",
                 "close": true
-            }
+            },
+            "group": "none"
         }
     ]
 }

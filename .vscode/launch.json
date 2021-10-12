@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "Spindly Debug",
+            "name": "Debug Spindly",
             "configurations": [
                 "Launch Svelte",
                 "Debug Go"
