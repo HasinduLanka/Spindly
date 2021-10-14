@@ -2,18 +2,25 @@ package spindlyapp
 
 import "github.com/HasinduLanka/Spindly/Spindly"
 
+var HubManager *Spindly.HubManager = Spindly.NewHubManager()
+
 type GlobalHub struct {
 	Instance *Spindly.HubInstance
 	AppName  Spindly.SpindlyStore
 	Version  Spindly.SpindlyStore
 }
 
-var Global = GlobalHub{}.Instanciate("Global")
-var Global2 = GlobalHub{}.Instanciate("Global2")
+var Global = GlobalHub{}.New("Global")
+var Global2 = GlobalHub{}.New("Global2")
 
-func (hub GlobalHub) Instanciate(InstanceID string) *GlobalHub {
+func (hub GlobalHub) New(InstanceID string) *GlobalHub {
+	hub.Instanciate(InstanceID)
+	return &hub
+}
+
+func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Instance = &Spindly.HubInstance{
-		HubName:    "GlobalHub",
+		HubClass:   "GlobalHub",
 		InstanceID: InstanceID,
 		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
@@ -36,10 +43,8 @@ func (hub GlobalHub) Instanciate(InstanceID string) *GlobalHub {
 	)
 	hub.Instance.Register(&hub.Version)
 
-	return &hub
-}
-
-func (hub *GlobalHub) Connect(connector *Spindly.HubConnector) {
+	HubManager.Register(hub.Instance)
+	return hub.Instance
 }
 
 func (hub *GlobalHub) GetAppName() string {
@@ -50,34 +55,39 @@ func (hub *GlobalHub) GetVersion() string {
 }
 
 type ClockHub struct {
-	Instance *Spindly.HubInstance
-	Clock134 Spindly.SpindlyStore
+	Instance  *Spindly.HubInstance
+	ClockFace Spindly.SpindlyStore
 }
 
-func (hub ClockHub) Instanciate(InstanceID string) *ClockHub {
+var LK = ClockHub{}.New("LK")
+
+func (hub ClockHub) New(InstanceID string) *ClockHub {
+	hub.Instanciate(InstanceID)
+	return &hub
+}
+
+func (hub *ClockHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Instance = &Spindly.HubInstance{
-		HubName:    "ClockHub",
+		HubClass:   "ClockHub",
 		InstanceID: InstanceID,
 		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
 
-	hub.Clock134 = Spindly.NewSpindlyStore(
-		"Clock134",
+	hub.ClockFace = Spindly.NewSpindlyStore(
+		"ClockFace",
 		func() interface{} {
 			return ``
 		},
 		nil,
 	)
-	hub.Instance.Register(&hub.Clock134)
+	hub.Instance.Register(&hub.ClockFace)
 
-	return &hub
+	HubManager.Register(hub.Instance)
+	return hub.Instance
 }
 
-func (hub *ClockHub) Connect(connector *Spindly.HubConnector) {
-}
-
-func (hub *ClockHub) GetClock134() string {
-	return hub.Clock134.Get().(string)
+func (hub *ClockHub) GetClockFace() string {
+	return hub.ClockFace.Get().(string)
 }
 
 type ExampleHub struct {
@@ -86,9 +96,14 @@ type ExampleHub struct {
 	TextBox1 Spindly.SpindlyStore
 }
 
-func (hub ExampleHub) Instanciate(InstanceID string) *ExampleHub {
+func (hub ExampleHub) New(InstanceID string) *ExampleHub {
+	hub.Instanciate(InstanceID)
+	return &hub
+}
+
+func (hub *ExampleHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Instance = &Spindly.HubInstance{
-		HubName:    "ExampleHub",
+		HubClass:   "ExampleHub",
 		InstanceID: InstanceID,
 		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
@@ -111,10 +126,8 @@ func (hub ExampleHub) Instanciate(InstanceID string) *ExampleHub {
 	)
 	hub.Instance.Register(&hub.TextBox1)
 
-	return &hub
-}
-
-func (hub *ExampleHub) Connect(connector *Spindly.HubConnector) {
+	HubManager.Register(hub.Instance)
+	return hub.Instance
 }
 
 func (hub *ExampleHub) GetMessage() string {
@@ -122,4 +135,10 @@ func (hub *ExampleHub) GetMessage() string {
 }
 func (hub *ExampleHub) GetTextBox1() string {
 	return hub.TextBox1.Get().(string)
+}
+
+func init() {
+	HubManager.RegisterClass("GlobalHub", func() Spindly.HubClass { return &GlobalHub{} })
+	HubManager.RegisterClass("ClockHub", func() Spindly.HubClass { return &ClockHub{} })
+	HubManager.RegisterClass("ExampleHub", func() Spindly.HubClass { return &ExampleHub{} })
 }

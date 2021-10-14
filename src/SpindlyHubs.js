@@ -1,14 +1,14 @@
 import { writable } from 'svelte/store';
 
-export default function ConnectHub(hubname, hub_instance_id) {
+export default function ConnectHub(hubclass, hub_instance_id) {
     let hub = {};
 
-    hub.hubname = hubname;
+    hub.hubclass = hubclass;
     hub.hub_instance_id = hub_instance_id;
     hub.stores = {};
 
     const host_protocol = (("https:" == document.location.protocol) ? "wss://" : "ws://");
-    const wsurl = host_protocol + document.location.host + "/spindly/ws/" + hubname + "/" + hub_instance_id;
+    const wsurl = host_protocol + document.location.host + "/spindly/ws/" + hubclass + "/" + hub_instance_id;
 
     hub.send = function (data) { }
 
@@ -22,12 +22,20 @@ export default function ConnectHub(hubname, hub_instance_id) {
             let socket = new WebSocket(wsurl);
 
             socket.onopen = () => {
-                console.log("Connected to Hub instance " + hubname + "/" + hub_instance_id);
-                socket.send("Hi From the Client!")
+                console.log("Connected to Hub instance " + hubclass + "/" + hub_instance_id);
             };
 
             socket.onmessage = (event) => {
                 console.log("Recieved : ", hub_instance_id, " : ", event.data);
+                let data = JSON.parse(event.data);
+
+                for (let store_name in data) {
+                    if (data.hasOwnProperty(store_name)) {
+                        hub.stores[store_name]._internal_set(data[store_name]);
+                    }
+                }
+
+
                 // socket.send("Reply from client " + new Date().toLocaleString());
             }
 
@@ -57,38 +65,22 @@ export default function ConnectHub(hubname, hub_instance_id) {
 
     return function SpindlyStore(storename, initialValue = null) {
 
-        const { subscribe, set, update } = writable(initialValue);
-
-        let subscribercount = 0;
-
-        let wsubscribe = function (run, callback) {
-            subscribercount++;
-            // console.log("subscribercount++", subscribercount);
-
-            let wunsubscribe = subscribe(run, callback);
+        const { subscribe, set, update } = writable(initialValue, () => {
+            // console.log('got a subscriber');
             return () => {
-                subscribercount--;
-                // console.log("subscribercount--", subscribercount);
-
-                if (subscribercount == 0) {
-
-                    // Free up resources
-                    // Delete the store
-                    delete hub.stores[storename];
-
-                    // console.log("Cleaning up...");
-                }
-                return wunsubscribe();
+                // console.log("Cleaning up...");
+                delete hub.stores[storename];
             }
-        }
+        });
 
         let store = {
-            subscribe: wsubscribe,
+            subscribe: subscribe,
             set: newvalue => {
                 set(newvalue);
                 StoreChanged(storename, newvalue);
             },
-            update: update
+            update: update,
+            _internal_set: set,
         };
 
         hub.stores[storename] = store;

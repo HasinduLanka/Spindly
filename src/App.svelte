@@ -1,12 +1,15 @@
 <script>
 	import { Global, Global2 } from "./stores/global.spindlyhubs.js";
 	import { ExampleHub } from "./stores/example.spindlyhubs.js";
+	import { LK } from "./stores/clock.spindlyhubs";
+
 	export let name = "world";
 
 	let { Message, TextBox1 } = ExampleHub("example1");
 	let { Message: Message2, TextBox1: TextBox2 } = ExampleHub("example2");
 
 	let { AppName, Version } = Global;
+	let {ClockFace} = LK;
 </script>
 
 <h1>Hello {name}!</h1>
@@ -33,6 +36,8 @@
 <pre>{$Message2}</pre>
 <br />
 <br />
+<p> This clock runs in the Go Host </p>
+<h1>{$ClockFace}</h1>
 
 <style>
 	h1 {

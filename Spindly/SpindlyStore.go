@@ -1,24 +1,27 @@
 package Spindly
 
-var listnerNextID chan int = make(chan int)
+var genNextID chan int = make(chan int)
 
 func init() {
 	go func() {
 		i := 0
 		for {
-			listnerNextID <- i
+			genNextID <- i
 			i++
 		}
 	}()
 
 }
 
+// SpindlyStore is a variable that can be listened to and set.
+// It's a state mirror of the corresponding svelte store
+// Use HubInstances to manage multiple stores
 type SpindlyStore struct {
 	Name      string
 	value     interface{}
 	Template  func() interface{}
-	Store     *HubConnector
-	listeners map[int]chan interface{}
+	Instance  *HubInstance
+	listeners map[int]chan interface{} // Internal Go listeners
 }
 
 func NewSpindlyStore(name string, template func() interface{}, initialValue interface{}) SpindlyStore {
@@ -43,8 +46,8 @@ func (v *SpindlyStore) Get() interface{} {
 func (v *SpindlyStore) Set(value interface{}) {
 	v.received(value)
 
-	if v.Store != nil {
-		v.Store.Send(v.Name, value)
+	if v.Instance != nil {
+		v.Instance.Send(v.Name, value)
 	}
 }
 
@@ -52,7 +55,7 @@ func (v *SpindlyStore) Set(value interface{}) {
 func (v *SpindlyStore) Listen() (chan interface{}, func()) {
 	listener := make(chan interface{})
 
-	id := <-listnerNextID
+	id := <-genNextID
 
 	v.listeners[id] = listener
 
@@ -63,7 +66,8 @@ func (v *SpindlyStore) Listen() (chan interface{}, func()) {
 	return listener, Unlisten
 }
 
-// (Private) Recieved from the store connection or changed by Go
+// (Private) Recieved from the store connection or changed by internal logic.
+// When these's multiple ws/jsch connections to the same store, the value is sent to all of them from wsreciver ; not here.
 func (v *SpindlyStore) received(value interface{}) {
 	v.value = value
 	for _, listener := range v.listeners {

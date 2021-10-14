@@ -20,12 +20,15 @@
     "ClockHub": {
         "filepath": "stores/clock",
         "stores": {
-            "Clock134": {
+            "ClockFace": {
                 "type": "string",
                 "template": "``",
                 "default": ""
             }
-        }
+        },
+        "instances": [
+            "LK"
+        ]
     },
     "ExampleHub": {
         "filepath": "stores/example",

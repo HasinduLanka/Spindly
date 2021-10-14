@@ -24,10 +24,13 @@ export default async function SpindlyMake(verbose = false) {
     let go = `package ${GoStorePackageName}
 
 import "github.com/HasinduLanka/Spindly/Spindly"
+
+var HubManager *Spindly.HubManager = Spindly.NewHubManager()
 `
+    const hublist = Object.entries(SpindlyStores);
 
 
-    for (const [hubname, hub] of Object.entries(SpindlyStores)) {
+    for (const [hubclass, hub] of hublist) {
 
 
         async function MakeSvelteHub() {
@@ -57,14 +60,14 @@ import "github.com/HasinduLanka/Spindly/Spindly"
             // Make the svelte Hub file
             let js = `import ConnectHub from '${rootDirPath}SpindlyHubs.js'
 
-const hub_name = '${hubname}';
+const hub_name = '${hubclass}';
 
-export function ${hubname}(hub_instance_id) {
+export function ${hubclass}(hub_instance_id) {
     let SpindlyStore = ConnectHub(hub_name, hub_instance_id);
     return {
 `;
             go += `
-type ${hubname} struct {
+type ${hubclass} struct {
     Instance *Spindly.HubInstance
 `
 
@@ -88,15 +91,20 @@ type ${hubname} struct {
 
             if ((hub.hasOwnProperty("instances")) && (hub.instances.length > 0)) {
                 for (const instname of hub.instances) {
-                    js += `export let ${instname} = ${hubname}("${instname}");\n`;
-                    go += `var ${instname} = ${hubname}{}.Instanciate("${instname}")\n`
+                    js += `export let ${instname} = ${hubclass}("${instname}");\n`;
+                    go += `var ${instname} = ${hubclass}{}.New("${instname}")\n`
                 }
             }
 
             go += `
-func (hub ${hubname}) Instanciate(InstanceID string) *${hubname} {
+func (hub ${hubclass}) New(InstanceID string) *${hubclass} {
+    hub.Instanciate(InstanceID)
+    return &hub
+}
+            
+func (hub *${hubclass}) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Instance = &Spindly.HubInstance{
-		HubName:    "${hubname}",
+		HubClass:    "${hubclass}",
 		InstanceID: InstanceID,
 		Stores:     make(map[string]*Spindly.SpindlyStore),
 	}
@@ -127,17 +135,15 @@ func (hub ${hubname}) Instanciate(InstanceID string) *${hubname} {
             }
 
             go += `
-            return &hub
-        }
-        
-        func (hub *${hubname}) Connect(connector *Spindly.HubConnector) {
-        `;
+	HubManager.Register(hub.Instance)
+    return hub.Instance
+}
+`;
 
-            go += `}\n`;
 
             for (const [name, V] of Object.entries(hub.stores)) {
                 go += `
-func (hub *${hubname}) Get${name}() ${V.type} {
+func (hub *${hubclass}) Get${name}() ${V.type} {
     return hub.${name}.Get().(${V.type})
 }`;
             }
@@ -150,13 +156,24 @@ func (hub *${hubname}) Get${name}() ${V.type} {
         }
 
         if (Verbose) {
-            await MakeSvelteHub(hubname, hub);
+            await MakeSvelteHub(hubclass, hub);
         } else {
             // Concurency
-            MakePromises.push(MakeSvelteHub(hubname, hub));
+            MakePromises.push(MakeSvelteHub(hubclass, hub));
         }
 
     }
+
+    go += `
+func init() {
+`
+
+
+    for (const [hubclass, hub] of hublist) {
+        go += `    HubManager.RegisterClass("${hubclass}", func() Spindly.HubClass { return &${hubclass}{} })
+`
+    }
+    go += `}`
 
     // Make the Go store file
     fs.writeFileSync(GoStoreFileName, go);

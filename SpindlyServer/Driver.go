@@ -1,8 +1,10 @@
 package SpindlyServer
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"github.com/HasinduLanka/Spindly/Spindly"
 	"github.com/gorilla/mux"
 )
 
@@ -21,9 +23,9 @@ func HandleStatic(router *mux.Router, staticPath string, indexPath string) {
 }
 
 // Handle websocket connections.
-func HandleWS(router *mux.Router) {
-	wshandler := WSHandler{}
-	router.HandleFunc("/spindly/ws/{hubtype}/{instance}", wshandler.ServeHub)
+func HandleHub(router *mux.Router, manager *Spindly.HubManager) {
+	wshandler := WSHandler{Manager: manager}
+	router.HandleFunc("/spindly/ws/{hubclass}/{instance}", wshandler.ServeHub)
 }
 
 // Starts serving router on the given port.
@@ -47,7 +49,21 @@ func log(msg string) {
 		println(msg)
 	}
 }
+func logobj(msg string, obj interface{}) {
+	if Verbose {
+		json, jsonerr := json.Marshal(obj)
+		if jsonerr == nil {
+			println(msg + " " + string(json))
+		} else {
+			println(msg)
+		}
+	}
+}
 
 func logerr(err error) {
 	println(err.Error())
+}
+
+func logerrmsg(msg string, err error) {
+	println(msg + "\n" + err.Error())
 }
