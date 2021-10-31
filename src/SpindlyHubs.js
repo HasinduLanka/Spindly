@@ -3,17 +3,23 @@ import { writable } from 'svelte/store';
 export default function ConnectHub(hubclass, hub_instance_id) {
     let hub = {};
 
+    if (!hub_instance_id) {
+        // Asign a unique id to hub_instance_id
+        hub_instance_id = hubclass + '_' + Date.now() + Math.random().toString(36).substr(2, 9);
+    }
+
     hub.hubclass = hubclass;
     hub.hub_instance_id = hub_instance_id;
     hub.stores = {};
+    hub.buffer = {};
 
     const host_protocol = (("https:" == document.location.protocol) ? "wss://" : "ws://");
     const wsurl = host_protocol + document.location.host + "/spindly/ws/" + hubclass + "/" + hub_instance_id;
 
-    hub.send = function (data) { }
+    hub.send = function (key, value) { }
 
     let StoreChanged = function (store_name, store_value) {
-        hub.send(JSON.stringify({ [store_name]: store_value }));
+        hub.send(store_name, store_value);
     }
 
 
@@ -23,6 +29,14 @@ export default function ConnectHub(hubclass, hub_instance_id) {
 
             socket.onopen = () => {
                 console.log("Connected to Hub instance " + hubclass + "/" + hub_instance_id);
+
+                for (const key in hub.buffer) {
+                    if (Object.hasOwnProperty.call(hub.buffer, key)) {
+                        const value = hub.buffer[key];
+                        hub.send(key, value);
+                    }
+                }
+                hub.buffer = {};
             };
 
             socket.onmessage = (event) => {
@@ -36,7 +50,6 @@ export default function ConnectHub(hubclass, hub_instance_id) {
                 }
 
 
-                // socket.send("Reply from client " + new Date().toLocaleString());
             }
 
             socket.onclose = event => {
@@ -48,8 +61,12 @@ export default function ConnectHub(hubclass, hub_instance_id) {
                 console.log("Hub connection error: ", error);
             };
 
-            hub.send = function (data) {
-                socket.send(data);
+            hub.send = function (key, value) {
+                if (socket.readyState == WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ [key]: value }));
+                } else {
+                    hub.buffer[key] = value;
+                }
             }
 
 

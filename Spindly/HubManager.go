@@ -48,10 +48,10 @@ func (M *HubManager) ConnectionEstablished(hubclass string, instanceid string, c
 	inst := M.Get(hubclass, instanceid)
 
 	if inst == nil {
-		clsctor, clsok := M.Classes[hubclass]
+		classCtor, hubClassFound := M.Classes[hubclass]
 
-		if clsok && (clsctor != nil) {
-			cls := clsctor()
+		if hubClassFound && (classCtor != nil) {
+			cls := classCtor()
 			inst = cls.Instanciate(instanceid)
 		} else {
 			return false

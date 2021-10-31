@@ -10,8 +10,10 @@ type GlobalHub struct {
 	Version  Spindly.SpindlyStore
 }
 
-var Global = GlobalHub{}.New("Global")
-var Global2 = GlobalHub{}.New("Global2")
+var GlobalHub_OnInstanciate func(*GlobalHub)
+
+var Global *GlobalHub
+var Global2 *GlobalHub
 
 func (hub GlobalHub) New(InstanceID string) *GlobalHub {
 	hub.Instanciate(InstanceID)
@@ -44,6 +46,9 @@ func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Instance.Register(&hub.Version)
 
 	HubManager.Register(hub.Instance)
+	if GlobalHub_OnInstanciate != nil {
+		go GlobalHub_OnInstanciate(hub)
+	}
 	return hub.Instance
 }
 
@@ -57,9 +62,10 @@ func (hub *GlobalHub) GetVersion() string {
 type ClockHub struct {
 	Instance  *Spindly.HubInstance
 	ClockFace Spindly.SpindlyStore
+	TimeZone  Spindly.SpindlyStore
 }
 
-var LK = ClockHub{}.New("LK")
+var ClockHub_OnInstanciate func(*ClockHub)
 
 func (hub ClockHub) New(InstanceID string) *ClockHub {
 	hub.Instanciate(InstanceID)
@@ -82,12 +88,27 @@ func (hub *ClockHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	)
 	hub.Instance.Register(&hub.ClockFace)
 
+	hub.TimeZone = Spindly.NewSpindlyStore(
+		"TimeZone",
+		func() interface{} {
+			return ``
+		},
+		`Local`,
+	)
+	hub.Instance.Register(&hub.TimeZone)
+
 	HubManager.Register(hub.Instance)
+	if ClockHub_OnInstanciate != nil {
+		go ClockHub_OnInstanciate(hub)
+	}
 	return hub.Instance
 }
 
 func (hub *ClockHub) GetClockFace() string {
 	return hub.ClockFace.Get().(string)
+}
+func (hub *ClockHub) GetTimeZone() string {
+	return hub.TimeZone.Get().(string)
 }
 
 type ExampleHub struct {
@@ -95,6 +116,8 @@ type ExampleHub struct {
 	Message  Spindly.SpindlyStore
 	TextBox1 Spindly.SpindlyStore
 }
+
+var ExampleHub_OnInstanciate func(*ExampleHub)
 
 func (hub ExampleHub) New(InstanceID string) *ExampleHub {
 	hub.Instanciate(InstanceID)
@@ -127,6 +150,9 @@ func (hub *ExampleHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Instance.Register(&hub.TextBox1)
 
 	HubManager.Register(hub.Instance)
+	if ExampleHub_OnInstanciate != nil {
+		go ExampleHub_OnInstanciate(hub)
+	}
 	return hub.Instance
 }
 
@@ -137,8 +163,10 @@ func (hub *ExampleHub) GetTextBox1() string {
 	return hub.TextBox1.Get().(string)
 }
 
-func init() {
+func InitializeHubs() {
 	HubManager.RegisterClass("GlobalHub", func() Spindly.HubClass { return &GlobalHub{} })
+	Global = GlobalHub{}.New("Global")
+	Global2 = GlobalHub{}.New("Global2")
 	HubManager.RegisterClass("ClockHub", func() Spindly.HubClass { return &ClockHub{} })
 	HubManager.RegisterClass("ExampleHub", func() Spindly.HubClass { return &ExampleHub{} })
 }

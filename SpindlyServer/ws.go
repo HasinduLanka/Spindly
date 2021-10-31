@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WSHandler struct {
+type HubServer struct {
 	Manager *Spindly.HubManager
 }
 
@@ -73,7 +73,7 @@ var upgrader = websocket.Upgrader{
 // 	return ws.WriteMessage(websocket.TextMessage, []byte(message))
 // }
 
-func (H *WSHandler) ServeHub(w http.ResponseWriter, r *http.Request) {
+func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	hubclass := vars["hubclass"]
@@ -125,7 +125,7 @@ func (H *WSHandler) ServeHub(w http.ResponseWriter, r *http.Request) {
 		log("Sending : " + hubclass + "/" + instance + " : " + string(string(message)))
 	}
 
-	if !H.Manager.ConnectionEstablished(hubclass, instance, conn) {
+	if !HSvr.Manager.ConnectionEstablished(hubclass, instance, conn) {
 		logerrmsg("Error establishing Hub connection : Hub class "+hubclass+" not found on Host ", nil)
 		return
 	}

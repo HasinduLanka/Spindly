@@ -86,13 +86,14 @@ type ${hubclass} struct {
 
 `;
             go += `}
+var ${hubclass}_OnInstanciate func(*${hubclass})
 
 `
 
             if ((hub.hasOwnProperty("instances")) && (hub.instances.length > 0)) {
                 for (const instname of hub.instances) {
                     js += `export let ${instname} = ${hubclass}("${instname}");\n`;
-                    go += `var ${instname} = ${hubclass}{}.New("${instname}")\n`
+                    go += `var ${instname} *${hubclass}\n`
                 }
             }
 
@@ -136,6 +137,9 @@ func (hub *${hubclass}) Instanciate(InstanceID string) *Spindly.HubInstance {
 
             go += `
 	HubManager.Register(hub.Instance)
+    if ${hubclass}_OnInstanciate != nil {
+		go ${hubclass}_OnInstanciate(hub)
+	}
     return hub.Instance
 }
 `;
@@ -165,13 +169,18 @@ func (hub *${hubclass}) Get${name}() ${V.type} {
     }
 
     go += `
-func init() {
+func InitializeHubs() {
 `
 
 
     for (const [hubclass, hub] of hublist) {
         go += `    HubManager.RegisterClass("${hubclass}", func() Spindly.HubClass { return &${hubclass}{} })
 `
+        if ((hub.hasOwnProperty("instances")) && (hub.instances.length > 0)) {
+            for (const instname of hub.instances) {
+                go += `${instname} = ${hubclass}{}.New("${instname}")\n`
+            }
+        }
     }
     go += `}`
 

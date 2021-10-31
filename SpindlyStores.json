@@ -24,11 +24,13 @@
                 "type": "string",
                 "template": "``",
                 "default": ""
+            },
+            "TimeZone": {
+                "type": "string",
+                "template": "``",
+                "default": "`Local`"
             }
-        },
-        "instances": [
-            "LK"
-        ]
+        }
     },
     "ExampleHub": {
         "filepath": "stores/example",

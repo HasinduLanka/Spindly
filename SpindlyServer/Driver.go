@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TODO : False
 var Verbose bool = true
 
 func NewRouter() *mux.Router {
@@ -24,7 +25,7 @@ func HandleStatic(router *mux.Router, staticPath string, indexPath string) {
 
 // Handle websocket connections.
 func HandleHub(router *mux.Router, manager *Spindly.HubManager) {
-	wshandler := WSHandler{Manager: manager}
+	wshandler := HubServer{Manager: manager}
 	router.HandleFunc("/spindly/ws/{hubclass}/{instance}", wshandler.ServeHub)
 }
 
@@ -49,6 +50,7 @@ func log(msg string) {
 		println(msg)
 	}
 }
+
 func logobj(msg string, obj interface{}) {
 	if Verbose {
 		json, jsonerr := json.Marshal(obj)
