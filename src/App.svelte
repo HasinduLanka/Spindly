@@ -5,8 +5,8 @@
 
   export let name = "world";
 
-  let { Message } = ExampleHub("example1");
-  let { Message: Message2 } = ExampleHub("example2");
+  let { Message, Greating } = ExampleHub("example1");
+  let { Message: Message2, Greating: Greating2 } = ExampleHub("example2");
 
   let { AppName, Version } = Global;
 </script>
@@ -25,14 +25,14 @@
 <p>Private store instance 1 :</p>
 <input type="text" bind:value={$Message} />
 <br />
-<pre>{$Message}</pre>
+<pre>{$Greating}</pre>
 <br />
 <br />
 
 <p>Private store 2 :</p>
 <input type="text" bind:value={$Message2} />
 <br />
-<pre>{$Message2}</pre>
+<pre>{$Greating2}</pre>
 
 <br />
 <br />

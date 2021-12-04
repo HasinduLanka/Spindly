@@ -9,7 +9,7 @@ import (
 )
 
 // TODO : False
-var Verbose bool = true
+var Verbose bool = false
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter()

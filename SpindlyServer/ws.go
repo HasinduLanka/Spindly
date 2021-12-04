@@ -22,57 +22,6 @@ var upgrader = websocket.Upgrader{
 	EnableCompression: false,
 }
 
-// // // define a wsreader which will listen for
-// // // new messages being sent to our WebSocket
-// // // endpoint
-// // func wsreader(ws *websocket.Conn) (Cancel func()) {
-// // 	go func() {
-// // 		for {
-// // 			// read in a message
-// // 			messageType, p, err := ws.ReadMessage()
-// // 			if err != nil {
-// // 				logerr(err)
-// // 				continue
-// // 			}
-
-// // 			if messageType == websocket.TextMessage {
-// // 				log(string(p))
-// // 			}
-
-// // 		}
-// // 	}()
-
-// // 	canceler := make(chan bool)
-// // 	cancel := func() {
-// // 		canceler <- true
-// // 	}
-
-// // 	// Make a timer channel
-// // 	ticker := time.NewTicker(time.Second * 1)
-// // 	go func() {
-// // 		for {
-// // 			select {
-// // 			case <-ticker.C:
-// // 				// Send a ping to the client
-// // 				if err := wsWrite(ws, "Hi from server! "+string(time.Now().Format(time.Stamp))); err != nil {
-// // 					logerr(err)
-// // 					return
-// // 				}
-// // 			case <-canceler:
-// // 				ticker.Stop()
-// // 				return
-// // 			}
-// // 		}
-// // 	}()
-
-// // 	return cancel
-
-// // }
-
-// func wsWrite(ws *websocket.Conn, message string) error {
-// 	return ws.WriteMessage(websocket.TextMessage, []byte(message))
-// }
-
 func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -155,8 +104,6 @@ func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if messageType == websocket.TextMessage {
-				// log(string(p))
-				// H.wsReceived(hubclass, instance, msg)
 
 				var messagemap map[string]json.RawMessage
 				jsonerr := json.Unmarshal(msg, &messagemap)

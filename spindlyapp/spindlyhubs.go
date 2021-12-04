@@ -38,7 +38,7 @@ func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Version = Spindly.NewSpindlyStore(
 		"Version",
 		func() interface{} {
-			return []byte{}
+			return ""
 		},
 		nil,
 	)
@@ -54,8 +54,8 @@ func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 func (hub *GlobalHub) GetAppName() string {
 	return hub.AppName.Get().(string)
 }
-func (hub *GlobalHub) GetVersion() []byte {
-	return hub.Version.Get().([]byte)
+func (hub *GlobalHub) GetVersion() string {
+	return hub.Version.Get().(string)
 }
 
 type ClockHub struct {

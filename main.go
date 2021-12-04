@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	"github.com/HasinduLanka/Spindly/spindlyapp"
@@ -14,11 +15,24 @@ func main() {
 
 	spindlyapp.ClockHub_OnInstanciate = StartClock
 
+	spindlyapp.ExampleHub_OnInstanciate = ExampleHub_OnInstanciate
+
 	spindlyapp.Configure()
 
 	println(spindlyapp.Global.GetAppName())
 
 	spindlyapp.Serve()
+}
+
+func ExampleHub_OnInstanciate(hub *spindlyapp.ExampleHub) {
+	hub.Message.OnChange(
+		func(newValue interface{}) {
+
+			var name = newValue.(string)
+			println("Message changed to: " + name)
+			hub.Greating.Set("Hello " + strings.Title(name) + ", Let's play with Spindly")
+		},
+	)
 }
 
 func StartClock(clock *spindlyapp.ClockHub) {
