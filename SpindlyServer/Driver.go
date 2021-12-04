@@ -37,7 +37,7 @@ func Serve(router *mux.Router, port string) {
 		Addr:    "localhost:" + port,
 	}
 
-	log("Starting server on http://localhost:" + port)
+	println("Host on http://localhost:" + port)
 
 	final := srv.ListenAndServe()
 	if final != nil {

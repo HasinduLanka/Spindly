@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import SpindlyDev from './spindlydev';
+import SpindlyPublish from './spindlypublish';
 
 const production = !process.env.ROLLUP_WATCH;
 const GORUN = (process.env.GORUN && process.env.GORUN === '1') || false;
@@ -81,6 +82,8 @@ export default {
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
 		production && terser(),
+
+		production && SpindlyPublish(),
 
 	],
 	watch: {

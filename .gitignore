@@ -3,3 +3,6 @@
 
 .DS_Store
 package-lock.json
+
+published-app
+published-app/**

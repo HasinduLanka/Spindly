@@ -25,7 +25,6 @@ type ServerHandler struct {
 // file located at the index path on the SPA handler will be served. This
 // is suitable behavior for serving an SPA (single page application).
 func (h ServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log("Static : " + r.URL.Path)
 
 	// prepend the path with the path to the static directory
 	path := filepath.Join(h.staticPath, r.URL.Path)
