@@ -117,15 +117,43 @@ func (hub *${hubclass}) Instanciate(InstanceID string) *Spindly.HubInstance {
     hub.${name} = Spindly.NewSpindlyStore(
 		"${name}",
 		func() interface{} {
-			return ${V.template}
-		},`;
+            `;
+
+                if ((V.hasOwnProperty("template")) && (V.template)) {
+                    go += `return ${V.template}`;
+                } else {
+
+                    if (V.type === "string") {
+                        go += `return ""`;
+
+                    } else if (V.type === "int") {
+                        go += `return 0`;
+
+                    } else if (V.type === "bool") {
+                        go += `return false`;
+
+                    } else if (V.type === "float64") {
+                        go += `return 0.0`;
+
+                    } else {
+                        go += `return ${V.type}{}`;
+                    }
+                }
+
+                go += `
+		},
+		`;
+
 
                 if ((V.hasOwnProperty("default")) && (V.default)) {
-                    go += `
-		${V.default},`;
+                    if (V.type === "string") {
+                        go += `\`${V.default}\`,`;
+                    } else {
+                        go += `${V.default},`;
+                    }
+
                 } else {
-                    go += `
-        nil,`;
+                    go += `nil,`;
                 }
 
                 go += `

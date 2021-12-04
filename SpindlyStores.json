@@ -5,30 +5,25 @@
             "AppName": {
                 "type": "string",
                 "template": "``",
-                "default": "`Spindly Sample App`"
+                "default": "Spindly Sample App"
             },
             "Version": {
-                "type": "string",
-                "template": "``"
+                "type": "string"
             }
         },
         "instances": [
-            "Global",
-            "Global2"
+            "Global"
         ]
     },
     "ClockHub": {
         "filepath": "stores/clock",
         "stores": {
             "ClockFace": {
-                "type": "string",
-                "template": "``",
-                "default": ""
+                "type": "string"
             },
             "TimeZone": {
                 "type": "string",
-                "template": "``",
-                "default": "`Local`"
+                "default": "Local"
             }
         }
     },
@@ -36,14 +31,11 @@
         "filepath": "stores/example",
         "stores": {
             "Message": {
-                "type": "string",
-                "template": "``",
-                "default": ""
+                "type": "string"
             },
-            "TextBox1": {
+            "Greating": {
                 "type": "string",
-                "template": "``",
-                "default": ""
+                "default": "Hello there!"
             }
         }
     }

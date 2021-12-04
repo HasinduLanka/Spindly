@@ -13,7 +13,6 @@ type GlobalHub struct {
 var GlobalHub_OnInstanciate func(*GlobalHub)
 
 var Global *GlobalHub
-var Global2 *GlobalHub
 
 func (hub GlobalHub) New(InstanceID string) *GlobalHub {
 	hub.Instanciate(InstanceID)
@@ -39,7 +38,7 @@ func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Version = Spindly.NewSpindlyStore(
 		"Version",
 		func() interface{} {
-			return ``
+			return []byte{}
 		},
 		nil,
 	)
@@ -55,8 +54,8 @@ func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 func (hub *GlobalHub) GetAppName() string {
 	return hub.AppName.Get().(string)
 }
-func (hub *GlobalHub) GetVersion() string {
-	return hub.Version.Get().(string)
+func (hub *GlobalHub) GetVersion() []byte {
+	return hub.Version.Get().([]byte)
 }
 
 type ClockHub struct {
@@ -82,7 +81,7 @@ func (hub *ClockHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.ClockFace = Spindly.NewSpindlyStore(
 		"ClockFace",
 		func() interface{} {
-			return ``
+			return ""
 		},
 		nil,
 	)
@@ -91,7 +90,7 @@ func (hub *ClockHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.TimeZone = Spindly.NewSpindlyStore(
 		"TimeZone",
 		func() interface{} {
-			return ``
+			return ""
 		},
 		`Local`,
 	)
@@ -114,7 +113,7 @@ func (hub *ClockHub) GetTimeZone() string {
 type ExampleHub struct {
 	Instance *Spindly.HubInstance
 	Message  Spindly.SpindlyStore
-	TextBox1 Spindly.SpindlyStore
+	Greating Spindly.SpindlyStore
 }
 
 var ExampleHub_OnInstanciate func(*ExampleHub)
@@ -134,20 +133,20 @@ func (hub *ExampleHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	hub.Message = Spindly.NewSpindlyStore(
 		"Message",
 		func() interface{} {
-			return ``
+			return ""
 		},
 		nil,
 	)
 	hub.Instance.Register(&hub.Message)
 
-	hub.TextBox1 = Spindly.NewSpindlyStore(
-		"TextBox1",
+	hub.Greating = Spindly.NewSpindlyStore(
+		"Greating",
 		func() interface{} {
-			return ``
+			return ""
 		},
-		nil,
+		`Hello there!`,
 	)
-	hub.Instance.Register(&hub.TextBox1)
+	hub.Instance.Register(&hub.Greating)
 
 	HubManager.Register(hub.Instance)
 	if ExampleHub_OnInstanciate != nil {
@@ -159,14 +158,13 @@ func (hub *ExampleHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 func (hub *ExampleHub) GetMessage() string {
 	return hub.Message.Get().(string)
 }
-func (hub *ExampleHub) GetTextBox1() string {
-	return hub.TextBox1.Get().(string)
+func (hub *ExampleHub) GetGreating() string {
+	return hub.Greating.Get().(string)
 }
 
 func InitializeHubs() {
 	HubManager.RegisterClass("GlobalHub", func() Spindly.HubClass { return &GlobalHub{} })
 	Global = GlobalHub{}.New("Global")
-	Global2 = GlobalHub{}.New("Global2")
 	HubManager.RegisterClass("ClockHub", func() Spindly.HubClass { return &ClockHub{} })
 	HubManager.RegisterClass("ExampleHub", func() Spindly.HubClass { return &ExampleHub{} })
 }

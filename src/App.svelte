@@ -1,14 +1,14 @@
 <script>
-	import { Global, Global2 } from "./stores/global.spindlyhubs.js";
-	import { ExampleHub } from "./stores/example.spindlyhubs.js";
-	import Clock from "./Clock.svelte";
+  import { Global } from "./stores/global.spindlyhubs.js";
+  import { ExampleHub } from "./stores/example.spindlyhubs.js";
+  import Clock from "./Clock.svelte";
 
-	export let name = "world";
+  export let name = "world";
 
-	let { Message, TextBox1 } = ExampleHub("example1");
-	let { Message: Message2, TextBox1: TextBox2 } = ExampleHub("example2");
+  let { Message } = ExampleHub("example1");
+  let { Message: Message2 } = ExampleHub("example2");
 
-	let { AppName, Version } = Global;
+  let { AppName, Version } = Global;
 </script>
 
 <h1>Hello {name}!</h1>

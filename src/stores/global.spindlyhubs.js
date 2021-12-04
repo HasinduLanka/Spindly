@@ -11,4 +11,3 @@ export function GlobalHub(hub_instance_id) {
 }
 
 export let Global = GlobalHub("Global");
-export let Global2 = GlobalHub("Global2");
