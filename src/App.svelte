@@ -8,7 +8,7 @@
   let { Message, Greating } = ExampleHub("example1");
   let { Message: Message2, Greating: Greating2 } = ExampleHub("example2");
 
-  let { AppName, Version } = Global;
+  let { AppName, Version, HelloMessage, SaidHello } = Global;
 </script>
 
 <h1>Hello {name}!</h1>
@@ -21,6 +21,9 @@
 <pre>Version : {$Version}</pre>
 
 <br />
+
+<input type="button" value="Say Hello" on:click={SaidHello} />
+<p>{$HelloMessage}</p>
 
 <p>Private store instance 1 :</p>
 <input type="text" bind:value={$Message} />

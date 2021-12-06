@@ -7,8 +7,6 @@ import (
 	"github.com/HasinduLanka/Spindly/spindlyapp"
 )
 
-//dcdc
-
 func main() {
 
 	println(" --- Spindly Server --- ")
@@ -21,7 +19,13 @@ func main() {
 
 	println(spindlyapp.Global.GetAppName())
 
+	spindlyapp.Global.SaidHello.OnChange(SaidHello)
+
 	spindlyapp.Serve()
+}
+
+func SaidHello(interface{}) {
+	spindlyapp.Global.HelloMessage.Set("Hello there, it's " + time.Now().Format("15:04:05") + " now. You are right on time!")
 }
 
 func ExampleHub_OnInstanciate(hub *spindlyapp.ExampleHub) {

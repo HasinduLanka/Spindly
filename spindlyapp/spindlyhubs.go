@@ -5,9 +5,11 @@ import "github.com/HasinduLanka/Spindly/Spindly"
 var HubManager *Spindly.HubManager = Spindly.NewHubManager()
 
 type GlobalHub struct {
-	Instance *Spindly.HubInstance
-	AppName  Spindly.SpindlyStore
-	Version  Spindly.SpindlyStore
+	Instance     *Spindly.HubInstance
+	AppName      Spindly.SpindlyStore
+	Version      Spindly.SpindlyStore
+	SaidHello    Spindly.SpindlyStore
+	HelloMessage Spindly.SpindlyStore
 }
 
 var GlobalHub_OnInstanciate func(*GlobalHub)
@@ -44,6 +46,24 @@ func (hub *GlobalHub) Instanciate(InstanceID string) *Spindly.HubInstance {
 	)
 	hub.Instance.Register(&hub.Version)
 
+	hub.SaidHello = Spindly.NewSpindlyStore(
+		"SaidHello",
+		func() interface{} {
+			return 0.0
+		},
+		nil,
+	)
+	hub.Instance.Register(&hub.SaidHello)
+
+	hub.HelloMessage = Spindly.NewSpindlyStore(
+		"HelloMessage",
+		func() interface{} {
+			return ""
+		},
+		nil,
+	)
+	hub.Instance.Register(&hub.HelloMessage)
+
 	HubManager.Register(hub.Instance)
 	if GlobalHub_OnInstanciate != nil {
 		go GlobalHub_OnInstanciate(hub)
@@ -56,6 +76,12 @@ func (hub *GlobalHub) GetAppName() string {
 }
 func (hub *GlobalHub) GetVersion() string {
 	return hub.Version.Get().(string)
+}
+func (hub *GlobalHub) GetSaidHello() float64 {
+	return hub.SaidHello.Get().(float64)
+}
+func (hub *GlobalHub) GetHelloMessage() string {
+	return hub.HelloMessage.Get().(string)
 }
 
 type ClockHub struct {

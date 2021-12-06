@@ -5,7 +5,7 @@ import fs from 'fs';
 let Verbose = false;
 let GoStoreFileName;
 
-export default async function SpindlyMake(verbose = false) {
+export async function SpindlyMake(verbose = false) {
     Verbose = verbose;
 
     if (Verbose) console.log('Spindly Make Started');
@@ -15,6 +15,8 @@ export default async function SpindlyMake(verbose = false) {
     const GoStorePackageName = "spindlyapp";
 
     GoStoreFileName = GoStorePackageName + "/spindlyhubs.go";
+
+    let SpindlyConfigs = JSON.parse(fs.readFileSync('SpindlyConfigs.json', 'utf8'));
 
     await CleanSpindlyHubs();
 
@@ -64,6 +66,10 @@ const hub_name = '${hubclass}';
 
 export function ${hubclass}(hub_instance_id) {
     let SpindlyStore = ConnectHub(hub_name, hub_instance_id);
+    let SpindlyEventStore = (storename) => {
+        let es = SpindlyStore(storename);
+        return () => { es.set(Math.random()); };
+    };
     return {
 `;
             go += `
@@ -75,7 +81,13 @@ type ${hubclass} struct {
             for (const [name, V] of Object.entries(hub.stores)) {
                 if (Verbose) console.log("\t\SpindlyStore : ", name);
 
-                js += `        ${name}: SpindlyStore("${name}"),\n`;
+                if (V.type === "event") {
+                    js += `        ${name}: SpindlyEventStore("${name}"),\n`;
+                    hub.stores[name].type = "float64";
+                } else {
+                    js += `        ${name}: SpindlyStore("${name}"),\n`;
+                }
+
                 go += `\t${name} Spindly.SpindlyStore\n`;
 
             }
@@ -215,6 +227,15 @@ func InitializeHubs() {
     // Make the Go store file
     fs.writeFileSync(GoStoreFileName, go);
 
+    if (SpindlyConfigs.hasOwnProperty("devdriver") && SpindlyConfigs.devdriver) {
+        let devdriver = SpindlyConfigs.devdriver;
+        if (devdriver == "browser") {
+            fs.writeFileSync("spindlyapp/driver.go", Driver_Browser);
+        } else if (devdriver == "webview") {
+            fs.writeFileSync("spindlyapp/driver.go", Driver_Webview);
+        }
+    }
+
     await Promise.all(MakePromises);
 
     Exec(`go fmt ${GoStoreFileName} `);
@@ -282,3 +303,69 @@ async function RemoveFile(file) {
 
 
 //  
+
+
+export const Driver_Browser = `
+package spindlyapp
+
+import (
+	"github.com/HasinduLanka/Spindly/SpindlyServer"
+	"github.com/gorilla/mux"
+)
+
+var router *mux.Router
+
+func Configure() {
+	InitializeHubs()
+	router = SpindlyServer.NewRouter()
+	SpindlyServer.HandleHub(router, HubManager)
+	SpindlyServer.HandleStatic(router, "public", "index.html")
+}
+
+func Serve() {
+	SpindlyServer.Serve(router, "32510")
+}
+
+`
+
+export const Driver_Webview = `
+package spindlyapp
+
+import (
+	"time"
+
+	"github.com/HasinduLanka/Spindly/SpindlyServer"
+	"github.com/gorilla/mux"
+	"github.com/webview/webview"
+)
+
+const Port = "32510"
+const debug = true
+
+var router *mux.Router
+var wv webview.WebView
+
+func Configure() {
+	InitializeHubs()
+	router = SpindlyServer.NewRouter()
+	SpindlyServer.HandleHub(router, HubManager)
+	SpindlyServer.HandleStatic(router, "public", "index.html")
+
+}
+
+func Serve() {
+	go func() {
+		SpindlyServer.Serve(router, Port)
+	}()
+
+	time.Sleep(time.Millisecond * 500)
+
+	wv = webview.New(debug)
+	defer wv.Destroy()
+	wv.SetTitle("Spindly")
+	wv.SetSize(1024, 640, webview.HintMin)
+	wv.Navigate("http://localhost:" + Port)
+	wv.Run()
+}
+
+`

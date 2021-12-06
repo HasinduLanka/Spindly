@@ -9,6 +9,12 @@
             },
             "Version": {
                 "type": "string"
+            },
+            "SaidHello": {
+                "type": "event"
+            },
+            "HelloMessage": {
+                "type": "string"
             }
         },
         "instances": [

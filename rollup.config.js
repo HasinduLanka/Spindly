@@ -88,6 +88,6 @@ export default {
 	],
 	watch: {
 		clearScreen: false,
-		exclude: 'src/**/*.spindlyhubs.js'
+		exclude: ['src/**/*.spindlyhubs.js', "spindlyapp/**"]
 	}
 };
