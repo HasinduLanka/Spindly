@@ -52,11 +52,11 @@ export default function SpindlyPublish() {
         archs = SpindlyConfigs.arch;
       }
 
-      let PublishApp = async (targetos, ext, arch, driver, buildargs = "") => {
+      let PublishApp = async (targetos, ext, arch, driver, buildargs = "", envvars = "") => {
         let dir = publishDir + "/" + appname + "-" + targetos + "-" + arch + "-" + driver + "/";
         fs.mkdirSync(dir + "public", { recursive: true });
         CopyFolder("public", dir + "public");
-        let cmd = `env GOOS=${targetos} GOARCH=${arch} go build ${buildargs} -o ${dir}${appname}${ext}`;
+        let cmd = `env GOOS=${targetos} GOARCH=${arch} ${envvars} go build ${buildargs} -o ${dir}${appname}${ext}`;
         await Exec(cmd);
 
         if (Verbose) console.log("> " + cmd);
@@ -145,6 +145,49 @@ export default function SpindlyPublish() {
             }
             if ((osarch === "arm") && archs.indexOf("arm") > -1) {
               await PublishApp("linux", "", "arm", "webview");
+            }
+          }
+        }
+      }
+
+
+      if (alldrivers.indexOf("webview-cross") > -1) {
+
+        fs.writeFileSync("spindlyapp/driver.go", Driver_Webview);
+
+
+        await Exec(`go mod tidy`);
+
+        if (SpindlyConfigs.hasOwnProperty("os") && SpindlyConfigs.os) {
+
+          let targetos = SpindlyConfigs.os;
+          const mingenv = `CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++`;
+
+          if (targetos.indexOf("windows") > -1) {
+            if (archs.indexOf("amd64") > -1) {
+              await PublishApp("windows", ".exe", "amd64", "webview-cross", `-ldflags="-H windowsgui"`, mingenv);
+            }
+            if (archs.indexOf("386") > -1) {
+              await PublishApp("windows", ".exe", "386", "webview-cross", `-ldflags="-H windowsgui"`, mingenv);
+            }
+
+          }
+
+          if (targetos.indexOf("darwin") > -1) {
+            if (archs.indexOf("amd64") > -1) {
+              await PublishApp("darwin", "", "amd64", "webview-cross", "", mingenv);
+            }
+          }
+
+          if (targetos.indexOf("linux") > -1) {
+            if (archs.indexOf("amd64") > -1) {
+              await PublishApp("linux", "", "amd64", "webview-cross", "", mingenv);
+            }
+            if (archs.indexOf("386") > -1) {
+              await PublishApp("linux", "", "386", "webview-cross", "", mingenv);
+            }
+            if (archs.indexOf("arm") > -1) {
+              await PublishApp("linux", "", "arm", "webview-cross", "", mingenv);
             }
           }
         }
