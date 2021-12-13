@@ -77,6 +77,8 @@ export default function SpindlyPublish() {
 
           if (targetos.indexOf("windows") > -1) {
             if (archs.indexOf("amd64") > -1) {
+              // TODO : 
+              // await PublishApp("windows", ".exe", "amd64", "browser", `-ldflags="-H windowsgui"`);
               await PublishApp("windows", ".exe", "amd64", "browser");
             }
             if (archs.indexOf("386") > -1) {

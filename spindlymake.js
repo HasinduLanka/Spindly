@@ -230,7 +230,7 @@ func InitializeHubs() {
     if (SpindlyConfigs.hasOwnProperty("devdriver") && SpindlyConfigs.devdriver) {
         let devdriver = SpindlyConfigs.devdriver;
         if (devdriver == "browser") {
-            fs.writeFileSync("spindlyapp/driver.go", Driver_Browser_Dev);
+            fs.writeFileSync("spindlyapp/driver.go", Driver_Browser);
         } else if (devdriver == "webview") {
             fs.writeFileSync("spindlyapp/driver.go", Driver_Webview);
         }
@@ -330,35 +330,6 @@ func Serve() {
 	SpindlyServer.Serve(router, "32510")
 }
 
-// Commands returns a list of possible commands to use to open a url.
-func CommandsOld() [][]string {
-	var cmds [][]string
-	if exe := os.Getenv("BROWSER"); exe != "" {
-		cmds = append(cmds, []string{exe})
-	}
-	switch runtime.GOOS {
-	case "darwin":
-		cmds = append(cmds, []string{"/usr/bin/open"})
-	case "windows":
-		cmds = append(cmds, []string{"cmd", "/c", "start"})
-	default:
-		if os.Getenv("DISPLAY") != "" {
-			// xdg-open is only for use in a desktop environment.
-			cmds = append(cmds, []string{"xdg-open"})
-		}
-	}
-
-	cmds = append(cmds,
-		[]string{"chrome"},
-		[]string{"google-chrome"},
-		[]string{"google-chrome-stable"},
-		[]string{"msedge"},
-		[]string{"chromium"},
-		[]string{"firefox"},
-	)
-	return cmds
-}
-
 func Commands(url string) [][]string {
 
 	var cmds [][]string
@@ -368,26 +339,30 @@ func Commands(url string) [][]string {
 		cmds = append(cmds, []string{"/usr/bin/open", url})
 
 	case "windows":
-		cmds = append(cmds,
-			[]string{"start", "chrome", "--app=" + url},
-			[]string{"start", "google-chrome", "--app=" + url},
-			[]string{"start", "google-chrome-stable", "--app=" + url},
-			[]string{"start", "msedge", "--app=" + url},
-			[]string{"start", "chromium", "--app=" + url},
-			[]string{"start", "firefox", "-ssb " + url},
-		)
 
+		cmds = append(cmds, []string{"cmd", "/c", "start", "msedge", "--app=" + url})
 		cmds = append(cmds, []string{"cmd", "/c", "start", url})
 
 	case "linux":
-		cmds = append(cmds,
-			[]string{"chrome", "--app=" + url},
-			[]string{"google-chrome", "--app=" + url},
-			[]string{"google-chrome-stable", "--app=" + url},
-			[]string{"msedge", "--app=" + url},
-			[]string{"chromium", "--app=" + url},
-			[]string{"firefox", "-ssb " + url},
-		)
+
+		if ProgramExists("chrome") {
+			cmds = append(cmds, []string{"chrome", "--app=" + url})
+		}
+		if ProgramExists("google-chrome") {
+			cmds = append(cmds, []string{"google-chrome", "--app=" + url})
+		}
+		if ProgramExists("google-chrome-stable") {
+			cmds = append(cmds, []string{"google-chrome-stable", "--app=" + url})
+		}
+		if ProgramExists("msedge") {
+			cmds = append(cmds, []string{"msedge", "--app=" + url})
+		}
+		if ProgramExists("chromium") {
+			cmds = append(cmds, []string{"chromium", "--app=" + url})
+		}
+		if ProgramExists("firefox") {
+			cmds = append(cmds, []string{"firefox", "-ssb " + url})
+		}
 
 		if os.Getenv("DISPLAY") != "" {
 			// xdg-open is only for use in a desktop environment.
@@ -404,11 +379,18 @@ func Commands(url string) [][]string {
 
 }
 
+func ProgramExists(program string) bool {
+	_, err := exec.LookPath(program)
+	return err == nil
+}
+
 // Open tries to open url in a browser and reports whether it succeeded.
 func Open(url string) bool {
 	for _, args := range Commands(url) {
+
 		fmt.Println("Opening", url, "with", args)
 		cmd := exec.Command(args[0], args[1:]...)
+
 		if cmd.Start() == nil && appearsSuccessful(cmd, 3*time.Second) {
 			return true
 		}
