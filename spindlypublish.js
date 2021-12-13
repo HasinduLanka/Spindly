@@ -56,10 +56,11 @@ export default function SpindlyPublish() {
         let dir = publishDir + "/" + appname + "-" + targetos + "-" + arch + "-" + driver + "/";
         fs.mkdirSync(dir + "public", { recursive: true });
         CopyFolder("public", dir + "public");
+        let cmd = `env GOOS=${targetos} GOARCH=${arch} go build ${buildargs} -o ${dir}${appname}${ext}`;
+        await Exec(cmd);
 
-        await Exec(`env GOOS=${targetos} GOARCH=${arch} go build ${buildargs} -o ${dir}${appname}${ext}`);
-
-        if (Verbose) console.log("Built " + dir);
+        if (Verbose) console.log("> " + cmd);
+        if (Verbose) console.log("Built " + dir + "\n");
 
       }
 
