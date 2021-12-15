@@ -28,7 +28,7 @@ jobs:
       run: rm -rf published-app ; mkdir published-app
         
     - name: Build
-      run: go build -v -o published-app/app ./...
+      run: go build -v -o published-app/ ./...
       
     - name: Upload Build Artifact Linux
       uses: actions/upload-artifact@v2.3.1
