@@ -64,6 +64,15 @@ export default function SpindlyPublish() {
 
       }
 
+      if (process.env.SPINDLYBUILD === "BROWSER") {
+        alldrivers = ["browser"];
+      }
+
+      if (process.env.SPINDLYBUILD === "WEBVIEW") {
+        alldrivers = ["webview"];
+      }
+
+
       if (alldrivers.indexOf("browser") > -1) {
 
         fs.writeFileSync("spindlyapp/driver.go", Driver_Browser);
