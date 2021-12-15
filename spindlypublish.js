@@ -2,6 +2,7 @@ import fg from "fast-glob";
 import { SpindlyMake, Driver_Browser, Driver_Webview } from "./spindlymake.js";
 import fs from 'fs';
 import os from 'os';
+import path from 'path';
 
 
 let Verbose = true;
@@ -55,7 +56,7 @@ export default function SpindlyPublish() {
       let PublishApp = async (targetos, ext, arch, driver, buildargs = "", envvars = "") => {
         let dir = publishDir + "/" + appname + "-" + targetos + "-" + arch + "-" + driver + "/";
         fs.mkdirSync(dir + "public", { recursive: true });
-        CopyFolder("public", dir + "public");
+        CopyFolder("public", dir);
         let cmd = `env GOOS=${targetos} GOARCH=${arch} ${envvars} go build ${buildargs} -o ${dir}${appname}${ext}`;
         await Exec(cmd);
 
@@ -220,20 +221,42 @@ export default function SpindlyPublish() {
 
 
 
-function CopyFolder(from, to) {
-  let files = fg.sync(from + "/**/*");
-  for (let file of files) {
-    let fileName = file.replace(from + "/", "");
-    if (fileName.indexOf("/") > -1) {
-      let folder = fileName.substring(0, fileName.indexOf("/"));
-      if (!fs.existsSync(to + "/" + folder)) {
-        fs.mkdirSync(to + "/" + folder);
-      }
+function copyFileSync(source, target) {
+
+  var targetFile = target;
+
+  // If target is a directory, a new file with the same name will be created
+  if (fs.existsSync(target)) {
+    if (fs.lstatSync(target).isDirectory()) {
+      targetFile = path.join(target, path.basename(source));
     }
-    fs.copyFileSync(file, to + "/" + fileName);
   }
+
+  fs.writeFileSync(targetFile, fs.readFileSync(source));
 }
 
+function CopyFolder(source, target) {
+  var files = [];
+
+  // Check if folder needs to be created or integrated
+  var targetFolder = path.join(target, path.basename(source));
+  if (!fs.existsSync(targetFolder)) {
+    fs.mkdirSync(targetFolder);
+  }
+
+  // Copy
+  if (fs.lstatSync(source).isDirectory()) {
+    files = fs.readdirSync(source);
+    files.forEach(function (file) {
+      var curSource = path.join(source, file);
+      if (fs.lstatSync(curSource).isDirectory()) {
+        CopyFolder(curSource, targetFolder);
+      } else {
+        copyFileSync(curSource, targetFolder);
+      }
+    });
+  }
+}
 
 function Exec(file) {
   var exec = require('child_process').exec;
