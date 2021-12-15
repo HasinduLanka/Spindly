@@ -26,9 +26,6 @@ jobs:
         
     - name: Setup Node.js environment
       uses: actions/setup-node@v2.5.0
-      with:
-        # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version
-        node-version-file: .nvmrc
         
     - name: NPM Run build
       run: npm run build
@@ -53,9 +50,6 @@ jobs:
 
     - name: Setup Node.js environment
       uses: actions/setup-node@v2.5.0
-      with:
-        # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version
-        node-version-file: .nvmrc
         
     - name: NPM Run build
       run: npm run build
