@@ -26,6 +26,9 @@ jobs:
         
     - name: Setup Node.js environment
       uses: actions/setup-node@v2.5.0
+      
+    - name: NPM Install
+      run: npm install
         
     - name: NPM Run build
       run: npm run build
@@ -50,6 +53,9 @@ jobs:
 
     - name: Setup Node.js environment
       uses: actions/setup-node@v2.5.0
+      
+    - name: NPM Install
+      run: npm install
         
     - name: NPM Run build
       run: npm run build
