@@ -17,7 +17,7 @@ jobs:
       run: sudo apt-get update
     
     - name: Install packs
-      run: sudo apt-get install -y webkit2gtk-driver
+      run: sudo apt-get install -y libwebkit2gtk-4.0-dev
 
     - name: Set up Go
       uses: actions/setup-go@v2
