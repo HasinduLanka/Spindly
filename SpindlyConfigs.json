@@ -14,5 +14,6 @@
         "amd64",
         "386",
         "arm"
-    ]
+    ],
+    "windowscli": true
 }

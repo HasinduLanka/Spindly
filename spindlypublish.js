@@ -134,10 +134,10 @@ export default function SpindlyPublish() {
 
           if ((ostype === "Windows_NT") && targetos.indexOf("windows") > -1) {
             if ((osarch === "x64") && archs.indexOf("amd64") > -1) {
-              await PublishApp("windows", ".exe", "amd64", "webview"); //`-ldflags="-H windowsgui"`
+              await PublishApp("windows", ".exe", "amd64", "webview", (SpindlyConfigs.windowscli ? "" : `-ldflags="-H windowsgui"`));
             }
             if ((osarch === "x32") && archs.indexOf("386") > -1) {
-              await PublishApp("windows", ".exe", "386", "webview");
+              await PublishApp("windows", ".exe", "386", "webview", (SpindlyConfigs.windowscli ? "" : `-ldflags="-H windowsgui"`));
             }
 
           }
