@@ -5,7 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import SpindlyDev from './spindlydev';
-import SpindlyPublish from './spindlypublish';
+import SpindlyPublish from './spindly-publish-plugin';
 
 const production = !process.env.ROLLUP_WATCH;
 const GORUN = (process.env.GORUN && process.env.GORUN === '1') || false;

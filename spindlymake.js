@@ -1,6 +1,8 @@
 
 import fg from 'fast-glob';
 import fs from 'fs';
+import child_process from 'child_process';
+
 
 let Verbose = false;
 let GoStoreFileName;
@@ -243,7 +245,7 @@ func InitializeHubs() {
 }
 
 function Exec(file) {
-    var exec = require('child_process').exec;
+    var exec = child_process.exec;
     exec(file, function callback(error, stdout, stderr) {
         if (stdout) console.log(file + ': ' + stdout);
         if (stderr) console.log(file + ': Erro : ' + stderr);
