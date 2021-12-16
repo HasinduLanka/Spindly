@@ -30,12 +30,15 @@ jobs:
         
     - name: NPM Run build
       run: env SPINDLYBUILD=WEBVIEW npm run build
+      
+    - name: List published files
+      run: ls -R published-app
         
     - name: Upload Build Artifact Linux
       uses: actions/upload-artifact@v2.3.1
       with:
         name: LinuxBuild
-        path: published-app/**/**
+        path: published-app/**/**/**
         if-no-files-found: error
         retention-days: 90
 
@@ -57,12 +60,15 @@ jobs:
         
     - name: NPM Run build
       run: env SPINDLYBUILD=WEBVIEW npm run build
+      
+    - name: List published files
+      run: ls -R published-app
         
     - name: Upload Build Artifact Windows
       uses: actions/upload-artifact@v2.3.1
       with:
         name: WindowsBuild
-        path: published-app/**/**
+        path: published-app/**/**/**
         if-no-files-found: error
         retention-days: 90
         
@@ -85,11 +91,14 @@ jobs:
         
     - name: NPM Run build
       run: env SPINDLYBUILD=WEBVIEW npm run build
+      
+    - name: List published files
+      run: ls -R published-app
         
     - name: Upload Build Artifact MacOS
       uses: actions/upload-artifact@v2.3.1
       with:
         name: MacOSBuild
-        path: published-app/**/**
+        path: published-app/**/**/**
         if-no-files-found: error
         retention-days: 90
