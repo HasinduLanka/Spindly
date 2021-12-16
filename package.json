@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rollup -c ; node spindly-publish.js",
+    "build": "rollup -c && node spindly-publish.js",
     "debug": "rollup -c -w",
     "dev": "GORUN=1 rollup -c -w"
   },
