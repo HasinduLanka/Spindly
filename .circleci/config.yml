@@ -1,27 +1,16 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-
 orbs:
-  node: circleci/node@4.9.0
+  node: circleci/node@4.7.0
   go: circleci/go@1.7.0
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 jobs:
-    npmbuild:
-      machine:
-        image: ubuntu-1604:202007-01
-      steps:
-        - run: echo "Hello"
-        - run: pwd
-        - run: cd ; ls -R .
-        - run: npm install
-        - run: npm run dev
-
-
-workflows:
-    example-workflow:
-      jobs: 
-        - npmbuild
-      
+  build:
+    executor:
+      name: node/default
+      tag: '10.4'
+    steps:
+      - checkout
+      - node/install
+      - run: npm install
+      - run: npm run dev
+      - run: pwd ; ls -R ; cd ; ls -R
