@@ -14,7 +14,8 @@ jobs:
         image: ubuntu-1604:202007-01
       steps:
         - run: echo "Hello"
-        - run: ls -R .
+        - run: pwd
+        - run: cd ; ls -R .
         - run: npm install
         - run: npm run dev
 
