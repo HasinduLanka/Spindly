@@ -1,4 +1,4 @@
-import { Driver_Browser, Driver_Webview } from "./spindlymake.js";
+import { Driver_WebApp, Driver_Webview } from "./spindlymake.js";
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -61,9 +61,9 @@ async function buildPackages() {
     }
 
 
-    if (alldrivers.indexOf("browser") > -1) {
+    if (alldrivers.indexOf("webapp") > -1) {
 
-        fs.writeFileSync("spindlyapp/driver.go", Driver_Browser);
+        fs.writeFileSync("spindlyapp/driver.go", Driver_WebApp);
 
 
         await Exec(`go mod tidy`);
@@ -74,31 +74,29 @@ async function buildPackages() {
 
             if (targetos.indexOf("windows") > -1) {
                 if (archs.indexOf("amd64") > -1) {
-                    // TODO : 
-                    // await PublishApp("windows", ".exe", "amd64", "browser", `-ldflags="-H windowsgui"`);
-                    await PublishApp("windows", ".exe", "amd64", "browser");
+                    await PublishApp("windows", ".exe", "amd64", "webapp", (SpindlyConfigs.windowscli ? "" : `-ldflags="-H windowsgui"`));
                 }
                 if (archs.indexOf("386") > -1) {
-                    await PublishApp("windows", ".exe", "386", "browser");
+                    await PublishApp("windows", ".exe", "386", "webapp", (SpindlyConfigs.windowscli ? "" : `-ldflags="-H windowsgui"`));
                 }
 
             }
 
             if (targetos.indexOf("darwin") > -1) {
                 if (archs.indexOf("amd64") > -1) {
-                    await PublishApp("darwin", "", "amd64", "browser");
+                    await PublishApp("darwin", "", "amd64", "webapp");
                 }
             }
 
             if (targetos.indexOf("linux") > -1) {
                 if (archs.indexOf("amd64") > -1) {
-                    await PublishApp("linux", "", "amd64", "browser");
+                    await PublishApp("linux", "", "amd64", "webapp");
                 }
                 if (archs.indexOf("386") > -1) {
-                    await PublishApp("linux", "", "386", "browser");
+                    await PublishApp("linux", "", "386", "webapp");
                 }
                 if (archs.indexOf("arm") > -1) {
-                    await PublishApp("linux", "", "arm", "browser");
+                    await PublishApp("linux", "", "arm", "webapp");
                 }
             }
         }

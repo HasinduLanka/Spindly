@@ -2,9 +2,9 @@
     "appname": "SpindlySample",
     "driver": [
         "webview",
-        "browser"
+        "webapp"
     ],
-    "devdriver": "webview",
+    "devdriver": "browser",
     "os": [
         "windows",
         "linux",

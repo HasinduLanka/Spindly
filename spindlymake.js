@@ -232,9 +232,11 @@ func InitializeHubs() {
     if (SpindlyConfigs.hasOwnProperty("devdriver") && SpindlyConfigs.devdriver) {
         let devdriver = SpindlyConfigs.devdriver;
         if (devdriver == "browser") {
-            fs.writeFileSync("spindlyapp/driver.go", Driver_Browser);
+            fs.writeFileSync("spindlyapp/driver.go", Driver_In_Browser);
         } else if (devdriver == "webview") {
             fs.writeFileSync("spindlyapp/driver.go", Driver_Webview);
+        } else if (devdriver == "webapp") {
+            fs.writeFileSync("spindlyapp/driver.go", Driver_WebApp);
         }
     }
 
@@ -304,7 +306,7 @@ async function RemoveFile(file) {
 }
 
 
-export const Driver_Browser = `
+export const Driver_WebApp = `
 package spindlyapp
 
 import (
@@ -420,7 +422,7 @@ func appearsSuccessful(cmd *exec.Cmd, timeout time.Duration) bool {
 `
 
 
-export const Driver_Browser_Dev = `
+export const Driver_In_Browser = `
 package spindlyapp
 
 import (
