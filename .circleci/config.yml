@@ -10,9 +10,11 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - go/install
       - node/install
+      - run: npm install
       - run: npm run build
-      - run: pwd ; ls -R
+      - run: pwd ; ls -R .
 
 workflows:
   workflow1:
