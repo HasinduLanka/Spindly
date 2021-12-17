@@ -1,0 +1,23 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.9.0
+  go: circleci/go@1.7.0
+
+jobs:
+  job1:
+    docker:
+      # replace with your preferred image
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - go/install
+      - node/install
+      - run: sudo apt update ; sudo apt install -y libwebkit2gtk-4.0-dev
+      - run: npm install
+      - run: npm run build
+      - run: pwd ; ls -R .
+
+workflows:
+  workflow1:
+    jobs:
+      - job1
