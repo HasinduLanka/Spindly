@@ -12,7 +12,7 @@ jobs:
       - checkout
       - go/install
       - node/install
-      - run: sudo apt-get install -y libwebkit2gtk-4.0-dev
+      - run: sudo apt update ; sudo apt install -y libwebkit2gtk-4.0-dev
       - run: npm install
       - run: npm run build
       - run: pwd ; ls -R .
