@@ -11,9 +11,8 @@ jobs:
     steps:
       - checkout
       - node/install
-      - run: npm install
-      - run: npm run dev
-      - run: pwd ; ls -R ; cd ; ls -R
+      - run: npm run build
+      - run: pwd ; ls -R
 
 workflows:
   workflow1:
