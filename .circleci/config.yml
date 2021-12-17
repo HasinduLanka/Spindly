@@ -1,16 +1,21 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
+  node: circleci/node@4.9.0
   go: circleci/go@1.7.0
 
 jobs:
-  build:
-    executor:
-      name: node/default
-      tag: '10.4'
+  job1:
+    docker:
+      # replace with your preferred image
+      - image: cimg/base:stable
     steps:
       - checkout
       - node/install
       - run: npm install
       - run: npm run dev
       - run: pwd ; ls -R ; cd ; ls -R
+
+workflows:
+  workflow1:
+    jobs:
+      - job1
