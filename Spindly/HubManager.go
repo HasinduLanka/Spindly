@@ -2,12 +2,17 @@ package Spindly
 
 // HubManager is used to manage Hub instances
 type HubManager struct {
-	instances map[string]*HubInstance
-	Classes   map[string]func() HubClass
+	instances     map[string]*HubInstance
+	Classes       map[string]func() HubClass
+	hubConnectors map[int]*HubConnector
 }
 
 func NewHubManager() *HubManager {
-	return &HubManager{instances: make(map[string]*HubInstance), Classes: make(map[string]func() HubClass)}
+	return &HubManager{
+		instances:     make(map[string]*HubInstance),
+		Classes:       make(map[string]func() HubClass),
+		hubConnectors: make(map[int]*HubConnector),
+	}
 }
 
 func (M *HubManager) Register(inst *HubInstance) {
@@ -60,9 +65,12 @@ func (M *HubManager) ConnectionEstablished(hubclass string, instanceid string, c
 
 	if inst != nil {
 		id := <-genNextID
+
+		M.hubConnectors[id] = &conn
 		inst.connectors[id] = conn
 		conn.OnReceived(inst.onReceived)
 		conn.OnClose(func() {
+			delete(M.hubConnectors, id)
 			inst.onConnetionClose(id)
 		})
 		conn.GetSnapshot(inst.getSnapshot)
@@ -70,6 +78,10 @@ func (M *HubManager) ConnectionEstablished(hubclass string, instanceid string, c
 	}
 
 	return false
+}
+
+func (M *HubManager) IsUnused() bool {
+	return len(M.hubConnectors) == 0
 }
 
 type HubClass interface {

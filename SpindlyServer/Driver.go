@@ -1,15 +1,18 @@
 package SpindlyServer
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/HasinduLanka/Spindly/Spindly"
 	"github.com/gorilla/mux"
 )
 
 // TODO : False
-var Verbose bool = false
+var Verbose bool = true
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter()
@@ -32,17 +35,50 @@ func HandleHub(router *mux.Router, manager *Spindly.HubManager) {
 // Starts serving router on the given port.
 // This function blocks until the server stops.
 func Serve(router *mux.Router, port string) {
+
 	srv := &http.Server{
 		Handler: router,
 		Addr:    "localhost:" + port,
 	}
 
-	println("Host on http://localhost:" + port)
+	log("Host on http://localhost:" + port)
 
-	final := srv.ListenAndServe()
-	if final != nil {
-		panic(final)
-	}
+	go func() {
+		final := srv.ListenAndServe()
+
+		if final != nil && len(server_shutdown_channel) == 0 {
+			panic(final)
+		}
+	}()
+
+	<-server_shutdown_channel
+
+	log("Shutting down server...")
+
+	go logerr(srv.Shutdown(context.Background()))
+	time.Sleep(time.Second * 4)
+	go logerr(srv.Close())
+
+}
+
+var server_shutdown_channel = make(chan bool, 132)
+
+func ShutdownServer() {
+	go func() {
+		for i := 0; len(server_shutdown_channel) < 128; i++ {
+			for j := 0; j < 64; j++ {
+				server_shutdown_channel <- true
+			}
+			time.Sleep(time.Millisecond * 400)
+		}
+
+	}()
+
+	time.Sleep(time.Second * 10)
+
+	log("Closing application...")
+	os.Exit(0)
+
 }
 
 func log(msg string) {
@@ -63,7 +99,9 @@ func logobj(msg string, obj interface{}) {
 }
 
 func logerr(err error) {
-	println(err.Error())
+	if err != nil {
+		println(err.Error())
+	}
 }
 
 func logerrmsg(msg string, err error) {

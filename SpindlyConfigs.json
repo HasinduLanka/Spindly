@@ -4,7 +4,7 @@
         "webview",
         "browser"
     ],
-    "devdriver": "browser",
+    "devdriver": "webview",
     "os": [
         "windows",
         "linux",

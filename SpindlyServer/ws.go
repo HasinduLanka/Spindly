@@ -67,11 +67,10 @@ func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 		message, jsonerr := json.Marshal(messagemap)
 		if jsonerr != nil {
 			logerrmsg("Error serializing websocket message : "+hubclass+"/"+instance+"."+storename, jsonerr)
-			conn.onClose()
 			return
 		}
 		sendch <- message
-		log("Sending : " + hubclass + "/" + instance + " : " + string(string(message)))
+		// log("Sending : " + hubclass + "/" + instance + " : " + string(message))
 	}
 
 	if !HSvr.Manager.ConnectionEstablished(hubclass, instance, conn) {
@@ -87,6 +86,12 @@ func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
+		<-server_shutdown_channel
+		log("Closing Hub connection : " + hubclass + "/" + instance)
+		ws.Close()
+	}()
+
+	go func() {
 		for {
 			// read in a message
 			messageType, msg, err := ws.ReadMessage()
@@ -95,6 +100,7 @@ func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 				if ce, ok := err.(*websocket.CloseError); ok {
 					logerrmsg("WSReceive : Websocket closed : "+hubclass+"/"+instance+" : ", ce)
 					conn.onClose()
+					HSvr.ExitIfUnused()
 					return
 				} else {
 					logerrmsg("WSReceive : Message read error on : "+hubclass+"/"+instance+" : ", err)
@@ -126,6 +132,12 @@ func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 
 	SendSnapshot()
 
+}
+
+func (HSvr *HubServer) ExitIfUnused() {
+	if HSvr.Manager.IsUnused() {
+		ShutdownServer()
+	}
 }
 
 type WSConnector struct {
