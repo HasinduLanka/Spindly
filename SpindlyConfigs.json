@@ -2,13 +2,16 @@
     "appname": "SpindlySample",
     "driver": [
         "webview",
-        "webapp"
+        "webapp",
+        "flutter"
     ],
     "devdriver": "browser",
     "os": [
         "windows",
         "linux",
-        "darwin"
+        "darwin",
+        "android",
+        "ios"
     ],
     "arch": [
         "amd64",

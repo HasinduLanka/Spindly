@@ -1,4 +1,4 @@
-import { Driver_WebApp, Driver_Webview } from "./spindlymake.js";
+import { Driver_In_Browser, Driver_WebApp, Driver_Webview } from "./spindlymake.js";
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -45,6 +45,18 @@ async function buildPackages() {
         fs.mkdirSync(dir + "public", { recursive: true });
         CopyFolder("public", dir);
         let cmd = `env GOOS=${targetos} GOARCH=${arch} ${envvars} go build ${buildargs} -o ${dir}${appname}${ext}`;
+        await Exec(cmd);
+
+        if (Verbose) console.log("> " + cmd);
+        if (Verbose) console.log("Built " + dir + "\n");
+
+    }
+
+    let PublishMobileBind = async (targetos, ext, buildargs = "", envvars = "") => {
+        let dir = publishDir + "/" + appname + "-" + targetos + "/";
+        fs.mkdirSync(dir + "public", { recursive: true });
+        CopyFolder("public", dir);
+        let cmd = `env ${envvars} gomobile bind ${buildargs} -o ${dir}${appname}${ext} ./GoApp`;
         await Exec(cmd);
 
         if (Verbose) console.log("> " + cmd);
@@ -188,6 +200,27 @@ async function buildPackages() {
                 }
             }
         }
+    }
+
+
+    if (alldrivers.indexOf("flutter") > -1) {
+
+        fs.writeFileSync("spindlyapp/driver.go", Driver_In_Browser);
+
+        await Exec(`go mod tidy`);
+        await Exec(`go get golang.org/x/mobile/bind`);
+
+        if (SpindlyConfigs.hasOwnProperty("os") && SpindlyConfigs.os) {
+
+            let targetos = SpindlyConfigs.os;
+
+            if (targetos.indexOf("android") > -1) {
+
+                await PublishMobileBind("android", ".aar");
+            }
+        }
+
+        await Exec(`go mod tidy`);
     }
 
 
