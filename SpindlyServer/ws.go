@@ -3,6 +3,7 @@ package SpindlyServer
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/HasinduLanka/Spindly/Spindly"
 	"github.com/gorilla/mux"
@@ -135,6 +136,11 @@ func (HSvr *HubServer) ServeHub(w http.ResponseWriter, r *http.Request) {
 }
 
 func (HSvr *HubServer) ExitIfUnused() {
+
+	for i := 0; i < 10 && HSvr.Manager.IsUnused(); i++ {
+		time.Sleep(time.Millisecond * 500)
+	}
+
 	if HSvr.Manager.IsUnused() {
 		ShutdownServer()
 	}
