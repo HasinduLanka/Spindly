@@ -6,40 +6,10 @@ import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import SpindlyDev from './spindlydev';
 import SpindlyPublish from './spindly-publish-plugin';
+import GoRun from './spindly-go-run';
 
 const production = !process.env.ROLLUP_WATCH;
-const GORUN = (process.env.GORUN && process.env.GORUN === '1') || false;
 
-function serve() {
-	let gppid;
-
-	function toExit() {
-		if (gppid) {
-			var kill = require('tree-kill');
-			kill(gppid);
-		}
-	}
-
-	return {
-		writeBundle() {
-			if (gppid) {
-				var kill = require('tree-kill');
-				kill(gppid);
-				console.log("Restarting Go");
-			}
-
-			let server = require('child_process').spawn('go', ["run", "."], {
-				stdio: ['ignore', 'inherit', 'inherit'],
-				// shell: true,
-			});
-
-			gppid = server.pid;
-
-			process.on('SIGTERM', toExit);
-			process.on('exit', toExit);
-		}
-	};
-}
 
 export default {
 	input: 'src/main.js',
@@ -73,7 +43,7 @@ export default {
 		}),
 		commonjs(),
 
-		GORUN && serve(),
+		GoRun(),
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
