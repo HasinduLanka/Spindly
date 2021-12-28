@@ -30,6 +30,11 @@ func HandleStatic(router *mux.Router, staticPath string, indexPath string) {
 func HandleHub(router *mux.Router, manager *Spindly.HubManager) {
 	wshandler := HubServer{Manager: manager}
 	router.HandleFunc("/spindly/ws/{hubclass}/{instance}", wshandler.ServeHub)
+
+	go func() {
+		time.Sleep(time.Second * 120)
+		wshandler.ExitIfUnused()
+	}()
 }
 
 // Starts serving router on the given port.
